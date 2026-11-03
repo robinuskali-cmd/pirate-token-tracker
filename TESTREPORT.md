@@ -5,10 +5,10 @@ Stand: 3. November 2026. Das Redesign verändert Darstellung, Navigation und Bed
 ## Automatisierte Funktionstests
 
 ```text
-node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs
+node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs
 
-tests   43
-pass    43
+tests   49
+pass    49
 fail     0
 skipped  0
 ```
@@ -107,6 +107,10 @@ Das [Pages-Deployment](https://github.com/schafermax809-arch/pirate-token-tracke
 - Standard wiederhergestellt: aktiv, M / S / U. Anschließend zum angemeldeten Live-Modus zurückgekehrt. Bei diesen Prüfungen wurden keine Cloud-Zählaktionen ausgeführt. Screenshot der neuen Einstellungen liegt im Ausgabeverzeichnis.
 
 Die oben dokumentierte Prüfung mit 25 Viewport-Kombinationen betrifft das ursprüngliche Redesign. Die neue Tastatursektion wurde zusätzlich in der aktuellen Browserbreite visuell geprüft; die vollständige Viewport-Matrix wurde dafür nicht wiederholt.
+
+## Crew-Battlepass · 3. November 2026
+
+Sechs zusätzliche Tests prüfen beide Startbestände ohne XP, zusätzlich gespeicherte Truhen, Stufengrenzen und Abschluss bei Stufe 20, Undo/Korrekturen, gesperrte und manipulierte Titel, dauerhafte kosmetische Auswahl, Trennung nach Spieler/Betriebsmodus und sichtbare Speicherfehler. Die XP werden aus dem gespeicherten Gesamtbestand abzüglich Startbestand berechnet; Änderungen an der Datenbank oder Tracker-Schreibrechten sind nicht erforderlich.
 
 ## Grenzen
 

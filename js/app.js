@@ -2,6 +2,7 @@ import { TrackerStore } from './store.js';
 import { createViews } from './views.js';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
+import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
 import { SHORTCUT_STORAGE_KEY, defaultShortcuts, readShortcuts, writeShortcuts, normalizeShortcutKey, shortcutLabel, shortcutAction } from './shortcuts.js';
 import { number as n, escapeHtml as e, duration, secondsSince, integer, activeSession, activeRound, roundCount, roundTotal, roundSeconds, totalChests, nextMilestone, dropProbability, requiredChests } from './core.js';
 
@@ -10,7 +11,7 @@ const authRedirect = authCallbackTarget(location.href);
 if (authRedirect) location.replace(authRedirect);
 const store = new TrackerStore();
 let shortcuts = readShortcuts(localStorage), shortcutDraft = structuredClone(shortcuts), shortcutDirty = false;
-const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'] };
+const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'], battlepass: ['Battlepass','trophy'] };
 let page = Object.hasOwn(pages, location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 let chartDays = 7, rngPercent = .1, rngChests = 1600, previousTotal = null, toastTimer;
 const playerName = id => id === 'max' ? 'Max' : 'Szymon';
@@ -45,12 +46,15 @@ function renderRng() {
   document.querySelector('#rng-comparison').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Annahme pro Truhe</th><th>Nach ${n(chests)} Truhen</th><th>50 % ab</th><th>90 % ab</th></tr></thead><tbody>${[.0001,.0005,.001].map(rate=>`<tr><td><strong>${percent(rate)}</strong> · hypothetisch</td><td>${percent(dropProbability(rate,chests))}</td><td>${n(requiredChests(rate,.5))} Truhen</td><td>${n(requiredChests(rate,.9))} Truhen</td></tr>`).join('')}</tbody></table></div>`;
   updateTableLabels();
 }
-const { shell, overview, roundsPage, statsPage, rngPage, settingsPage } = createViews({
+const equippedTitleKey = () => titleStorageKey(store.demo ? 'demo' : store.scope, store.actor);
+const getEquippedTitle = () => equippedReward(localStorage, equippedTitleKey(), store.state?.players.find(p=>p.id===store.actor));
+const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage } = createViews({
   store, pages, button, avatar, connection, saved, displayTotal, pendingFor, date, time, playerName,
   getPage: () => page, getChartDays: () => chartDays,
   getRng: () => ({ percent: rngPercent, chests: rngChests }),
   getShortcuts: () => shortcuts, getShortcutDraft: () => shortcutDraft, shortcutLabel,
   isShortcutDirty: () => shortcutDirty,
+  getEquippedTitle,
 });
 let lastRenderedPage = null;
 const counterHistory = new Map();
@@ -96,7 +100,7 @@ function render() {
   const focusAttributes = focused?.tagName === 'BUTTON' ? ['action','player','delta','page','round','request'].filter(key=>focused.dataset[key]).map(key=>`[data-${key}="${CSS.escape(focused.dataset[key])}"]`).join('') : '';
   if (!store.state && !['signedout','error'].includes(store.status)) { root.innerHTML=shell('<div class="empty"><span class="loader" style="display:inline-block"></span><p class="mt">Das Logbuch wird geladen …</p></div>'); return; }
   if (!store.state) root.innerHTML=shell(loginPage());
-  else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage})[page]());
+  else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage})[page]());
   if (page==='rng' && store.state) renderRng();
   updateTableLabels();
   if (lastRenderedPage !== page) root.querySelector('.view')?.classList.add('view-enter');
@@ -128,6 +132,7 @@ function keyboardDirty() {
   const error = root.querySelector('#shortcut-error'); if (error) error.textContent = '';
 }
 window.addEventListener('storage', event => {
+  if (event.key === equippedTitleKey()) { render(); return; }
   if (event.key !== SHORTCUT_STORAGE_KEY) return;
   shortcuts = readShortcuts(localStorage);
   if (!shortcutDirty) shortcutDraft = structuredClone(shortcuts);
@@ -201,6 +206,7 @@ async function undo(player) {
   await store.mutate('undo',{player_id:player,change_id:change.id,expected_revision:change.round_id?roundCount(s,change.round_id,player).revision:0});
 }
 const actions={
+  'equip-title':b=>{available();const reward=equipReward(localStorage,equippedTitleKey(),store.state.players.find(p=>p.id===store.actor),Number(b.dataset.level));render();toast(`Titel ausgerüstet: ${reward.title}`);},
   'shortcuts-reset':()=>saveKeyboard(defaultShortcuts()),
   'increment':b=>add(b.dataset.player,Number(b.dataset.delta)),
   'undo':b=>undo(b.dataset.player),

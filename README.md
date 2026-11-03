@@ -134,6 +134,14 @@ Die Website speichert Passwörter weder im Projekt noch im eigenen Browserspeich
 - Die Gegenkarte ist absichtlich gesperrt. In der Demo könnt ihr den Testspieler wechseln.
 - „Rückgängig“ kehrt einen Live-Klick genau einmal um. Nach einer absoluten Korrektur oder einem Rundenabschluss bitte den Rundengesamtwert im Rundenbuch bearbeiten. Die Oberfläche lädt für die schnelle Undo-Funktion die jüngsten 200 Änderungen; ältere Runden lassen sich weiterhin bearbeiten.
 
+### Crew-Battlepass
+
+Der Bereich **Battlepass** enthält 20 dauerhaft verfügbare Stufen. Jede gespeicherte Truhe oberhalb des persönlichen Startbestands gibt 10 XP. Alle 1.000 XP (100 Truhen) wird ein neuer Piratentitel freigeschaltet, bis zur Piratenlegende bei Stufe 20 / 2.000 zusätzlich erfassten Truhen. Bestehende zusätzlich erfasste Truhen zählen automatisch mit. Weitere Truhen erhöhen auch nach Stufe 20 die Gesamt-XP.
+
+Der Fortschritt wird aus den gespeicherten Supabase-Zählwerten berechnet und ist damit auf allen angemeldeten Geräten gleich. Startbestände, vorgemerkte Offline-Klicks und wiederholtes Laden geben keine zusätzlichen XP. Undo und Korrekturen können Stufen wieder zurücknehmen. Dies ist ein eigener kostenloser Tracker-Pass mit virtuellen Titeln.
+
+**Ausrüsten** zeigt einen freigeschalteten Titel auf der eigenen Zählkarte an. Diese kosmetische Auswahl wird nur in diesem Browser gespeichert, getrennt nach Account und Demo/Live; andere Tabs desselben Accounts übernehmen sie. Über **Basistitel verwenden** lässt sie sich zurücksetzen. Wird der gewählte Titel durch eine Zählkorrektur gesperrt, wird der Basistitel angezeigt. Es gibt keine zusätzlichen Datenbanktabellen oder Schreibrechte für den Battlepass.
+
 ### Tastaturbelegung anpassen
 
 Unter **Einstellungen → Tastaturbelegung** ein Tastenfeld anklicken, die gewünschte Taste drücken und **Belegung speichern** wählen. Erlaubt sind einzelne Buchstaben, Ziffern, Pfeiltasten und die Leertaste. Rückgängig muss eine andere Taste als +1 verwenden. Max und Szymon dürfen dieselbe +1-Taste verwenden, weil nur der eigene Spieler zählt.
@@ -179,7 +187,7 @@ Browserspeicher nicht löschen und Privatmodus nicht schließen, solange Anfrage
 Ohne zusätzliche Bibliotheken, mit Node.js 22+:
 
 ```sh
-node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs
+node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs
 ```
 
 SQL zusätzlich mit einer lokalen PostgreSQL-WASM-Engine (PGlite) testen:
