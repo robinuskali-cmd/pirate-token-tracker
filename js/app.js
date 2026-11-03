@@ -97,7 +97,7 @@ function render() {
   if (pointerHeld) { renderDeferred = true; return; }
   const focusId = document.activeElement?.id;
   const focused = document.activeElement;
-  const focusAttributes = focused?.tagName === 'BUTTON' ? ['action','player','delta','page','round','request'].filter(key=>focused.dataset[key]).map(key=>`[data-${key}="${CSS.escape(focused.dataset[key])}"]`).join('') : '';
+  const focusAttributes = focused?.tagName === 'BUTTON' ? ['action','player','delta','page','round','request','level'].filter(key=>focused.dataset[key]).map(key=>`[data-${key}="${CSS.escape(focused.dataset[key])}"]`).join('') : '';
   if (!store.state && !['signedout','error'].includes(store.status)) { root.innerHTML=shell('<div class="empty"><span class="loader" style="display:inline-block"></span><p class="mt">Das Logbuch wird geladen …</p></div>'); return; }
   if (!store.state) root.innerHTML=shell(loginPage());
   else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage})[page]());
