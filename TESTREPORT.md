@@ -81,10 +81,20 @@ Hover-, gedrückte, gesperrte, Fokus-, Lade- und Fehlerzustände sind definiert.
 - Beide vom Nutzer angelegten Auth-Accounts sind bestätigt und eindeutig den Spielerrollen zugeordnet. Die Datenbank bestätigt für Max 500 und Szymon 1.100 Starttruhen sowie `login_assigned = true` für beide. Passwörter wurden vom Nutzer selbst gesetzt und nicht im Projekt gespeichert.
 - Das [Deployment der Supabase-Konfiguration](https://github.com/schafermax809-arch/pirate-token-tracker/actions/runs/41710644862) war erfolgreich. Die ausgelieferte Konfiguration enthält die richtige Projekt-URL und einen öffentlichen Publishable Key; die Website lädt anschließend das echte Anmeldeformular.
 
+## Live-Abnahme mit Max · 3. November 2026
+
+- Nutzer selbst als Max angemeldet; die Einstellungen zeigen Max und „Live verbunden“. Kein Passwort vom Agenten eingegeben oder ausgelesen.
+- Ausgangsstand Max 500 / Szymon 1.100 / Team 1.600; keine Session und keine vorgemerkten Änderungen. Szymons Zählwerk ist für Max gesperrt.
+- Zweiten Tab derselben Website im selben Browserprofil geöffnet. Auch dort bestätigte Realtime die Verbindung.
+- Im ersten Tab genau einmal +1 geklickt. Nach dem Speichern: Max 501 / Team 1.601, Warteschlange leer. Der zweite Tab zeigte die gespeicherte Änderung einschließlich Tagesauswertung ohne Neuladen.
+- Ersten Tab neu geladen: Anmeldung und Cloud-Stand 501 / 1.100 blieben erhalten; Realtime verband sich wieder.
+- Den Testklick über Rückgängig zurückgenommen. Beide Tabs zeigten wieder Max 500 / Szymon 1.100 / Team 1.600. Beide Warteschlangen waren leer und die Tages-Nettoänderung wieder 0.
+- Der Test hinterlässt die regulären zwei Audit-Einträge (+1 und Undo −1), keine zusätzliche Session oder Runde. Der zusätzliche Testtab wurde geschlossen.
+
 ## Grenzen
 
-Die Passwortverwaltung wurde um acht automatisierte Prüfungen mit einer simulierten Auth-API ergänzt: Eingabevalidierung, bestätigte Sitzung, Prüfung des bisherigen Passworts, Abbruch bei Benutzerwechsel/abgelaufener Sitzung, Recovery-Modus, unverändertes Redirect-Ziel, generische Rücksetz-Antwort sowie verständliche SMTP-/Ratenlimit-Fehler. Der Browser zeigt das Rücksetzformular; der Link auf der Anmeldeseite sowie ein abgelaufener Link zur Website-Wurzel wurden geprüft. Auth-Fragmente werden nach Verarbeitung aus der URL entfernt. Eine echte Rücksetz-E-Mail und eine Änderung echter Zugangsdaten wurden bewusst nicht ausgeführt; deren Ausführung erfolgt durch den Benutzer.
+Die Passwortverwaltung wurde um acht automatisierte Prüfungen mit einer simulierten Auth-API ergänzt: Eingabevalidierung, bestätigte Sitzung, Prüfung des bisherigen Passworts, Abbruch bei Benutzerwechsel/abgelaufener Sitzung, Recovery-Modus, unverändertes Redirect-Ziel, generische Rücksetz-Antwort sowie verständliche SMTP-/Ratenlimit-Fehler. Der Browser zeigt das Rücksetzformular; der Link auf der Anmeldeseite sowie ein abgelaufener Link zur Website-Wurzel wurden geprüft. Auth-Fragmente werden nach Verarbeitung aus der URL entfernt. Das Versenden echter Rücksetz-E-Mails und Ändern echter Zugangsdaten wurden nicht vom Agenten ausgeführt; diese Schritte übernimmt der Benutzer. Die E-Mail-Zustellung und der Passwortwechsel selbst wurden nicht beobachtet.
 
-Noch nicht end-to-end geprüft sind echter Spielerlogin, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen und zwei physische Geräte. Die Anmeldung erfordert das vom Nutzer selbst gesetzte Tracker-Passwort. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
+Noch nicht end-to-end geprüft sind Szymons eigener Login, langfristiger Token-Refresh, konkurrierende Änderungen mit zwei verschiedenen Spieleraccounts und zwei physische Geräte. Der Live-Test prüft zwei WebSocket-Verbindungen desselben Max-Accounts im selben Browserprofil. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
 
 Der Cloud-Abnahmetest steht weiterhin in `README.md`.
