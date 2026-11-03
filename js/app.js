@@ -1,5 +1,5 @@
 import { TrackerStore } from './store.js';
-import { createViews } from './views.js';
+import { createViews } from './views.js?v=ingame-1';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';

@@ -26,8 +26,8 @@ jobs:
       - name: Prepare static files
         run: |
           mkdir _site
-          cp index.html account.html .nojekyll README.md DESIGN.md TESTREPORT.md _site/
-          cp -r assets js supabase _site/
+          cp index.html account.html ingame.html .nojekyll README.md DESIGN.md TESTREPORT.md _site/
+          cp -r assets js supabase downloads _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

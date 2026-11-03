@@ -142,6 +142,14 @@ Der Fortschritt wird aus den gespeicherten Supabase-Zählwerten berechnet und is
 
 **Ausrüsten** zeigt einen freigeschalteten Titel auf der eigenen Zählkarte an. Diese kosmetische Auswahl wird nur in diesem Browser gespeichert, getrennt nach Account und Demo/Live; andere Tabs desselben Accounts übernehmen sie. Über **Basistitel verwenden** lässt sie sich zurücksetzen. Wird der gewählte Titel durch eine Zählkorrektur gesperrt, wird der Basistitel angezeigt. Es gibt keine zusätzlichen Datenbanktabellen oder Schreibrechte für den Battlepass.
 
+### Im Spiel zählen, ohne zum Browser zu wechseln
+
+Über **Einstellungen → Tastaturbelegung → Ingame-Hotkeys** öffnet ihr die [Download- und Einrichtungsseite](https://schafermax809-arch.github.io/pirate-token-tracker/ingame.html). Der optionale portable Windows-Helfer meldet sich mit dem vorhandenen Tracker-Account direkt bei Supabase an. Standard: **F8 +1**, **F9 Rückgängig**, **F10 Pause/Fortsetzen**. Nach **Hotkeys aktivieren** das Fenster minimieren und spielen; der Browser kann geschlossen bleiben. Eigene Tastenbelegungen sind im Helfer möglich und unabhängig von den Browser-Kürzeln.
+
+Eine aktive Session benötigt vorher eine gestartete Runde. Der Helfer benutzt dieselben Datenbankregeln und eindeutigen Anfragekennungen. Offene Anfragen bleiben nach Verbindungsabbrüchen/Neustarts im lokalen Puffer, Zugangsdaten bleiben nur im Arbeitsspeicher. Bei jedem Helferstart neu anmelden. Der Windows-Helfer verwendet `RegisterHotKey` mit Wiederholsperre und keine Spiel-Hooks. Windows-API und Übertragung wurden geprüft; ein tatsächlicher Tastendruck während einer Fortnite-Sitzung muss noch vom Nutzer geprüft werden.
+
+Quellcode, Datenablage, Fehlerbehandlung und lokale Bau-/Prüfanleitung: [desktop/README.md](./desktop/README.md). Der eigenständig gebaute Download ist unsigniert.
+
 ### Tastaturbelegung anpassen
 
 Unter **Einstellungen → Tastaturbelegung** ein Tastenfeld anklicken, die gewünschte Taste drücken und **Belegung speichern** wählen. Erlaubt sind einzelne Buchstaben, Ziffern, Pfeiltasten und die Leertaste. Rückgängig muss eine andere Taste als +1 verwenden. Max und Szymon dürfen dieselbe +1-Taste verwenden, weil nur der eigene Spieler zählt.
