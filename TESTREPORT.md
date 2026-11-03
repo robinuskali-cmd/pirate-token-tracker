@@ -78,10 +78,11 @@ Hover-, gedrückte, gesperrte, Fokus-, Lade- und Fehlerzustände sind definiert.
 - GitHub-Pages-Adresse als Site URL und genaue erlaubte Redirect-URL gespeichert.
 - Öffentliche Projekt-URL und Publishable Key in der Website konfiguriert. Keine Datenbankpasswörter oder Secret-/Service-Role-Keys im Quellcode.
 - Auth-Settings-API mit dem öffentlichen Key erreichbar (HTTP 200). Unangemeldeter Aufruf von `tracker_snapshot` wird abgelehnt (HTTP 401, SQLSTATE 42501: permission denied for function tracker_snapshot).
-- Die beiden Spielerzugänge und ihre Rollen-Zuordnung sind noch einzurichten; ein echter Spielerlogin und Realtime zwischen angemeldeten Geräten wurden noch nicht geprüft.
+- Beide vom Nutzer angelegten Auth-Accounts sind bestätigt und eindeutig den Spielerrollen zugeordnet. Die Datenbank bestätigt für Max 500 und Szymon 1.100 Starttruhen sowie `login_assigned = true` für beide. Passwörter wurden vom Nutzer selbst gesetzt und nicht im Projekt gespeichert.
+- Das [Deployment der Supabase-Konfiguration](https://github.com/schafermax809-arch/pirate-token-tracker/actions/runs/41710644862) war erfolgreich. Die ausgelieferte Konfiguration enthält die richtige Projekt-URL und einen öffentlichen Publishable Key; die Website lädt anschließend das echte Anmeldeformular.
 
 ## Grenzen
 
-Bis zur Einrichtung der Spielerzugänge bleiben echter Supabase-Login, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen und zwei physische Geräte ungeprüft. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
+Noch nicht end-to-end geprüft sind echter Spielerlogin, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen und zwei physische Geräte. Die Anmeldung erfordert das vom Nutzer selbst gesetzte Tracker-Passwort. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
 
 Der Cloud-Abnahmetest steht weiterhin in `README.md`.
