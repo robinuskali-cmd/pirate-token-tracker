@@ -1,0 +1,14 @@
+{
+  "name": "pirate-token-tracker",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/core.test.mjs tests/store.test.mjs",
+    "test:db": "node --test tests/database.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14"
+  }
+}
