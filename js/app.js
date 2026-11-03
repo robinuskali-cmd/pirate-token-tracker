@@ -2,12 +2,14 @@ import { TrackerStore } from './store.js';
 import { createViews } from './views.js';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
+import { SHORTCUT_STORAGE_KEY, defaultShortcuts, readShortcuts, writeShortcuts, normalizeShortcutKey, shortcutLabel, shortcutAction } from './shortcuts.js';
 import { number as n, escapeHtml as e, duration, secondsSince, integer, activeSession, activeRound, roundCount, roundTotal, roundSeconds, totalChests, nextMilestone, dropProbability, requiredChests } from './core.js';
 
 const root = document.querySelector('#app'), dialog = document.querySelector('#dialog');
 const authRedirect = authCallbackTarget(location.href);
 if (authRedirect) location.replace(authRedirect);
 const store = new TrackerStore();
+let shortcuts = readShortcuts(localStorage), shortcutDraft = structuredClone(shortcuts), shortcutDirty = false;
 const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'] };
 let page = Object.hasOwn(pages, location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 let chartDays = 7, rngPercent = .1, rngChests = 1600, previousTotal = null, toastTimer;
@@ -47,6 +49,8 @@ const { shell, overview, roundsPage, statsPage, rngPage, settingsPage } = create
   store, pages, button, avatar, connection, saved, displayTotal, pendingFor, date, time, playerName,
   getPage: () => page, getChartDays: () => chartDays,
   getRng: () => ({ percent: rngPercent, chests: rngChests }),
+  getShortcuts: () => shortcuts, getShortcutDraft: () => shortcutDraft, shortcutLabel,
+  isShortcutDirty: () => shortcutDirty,
 });
 let lastRenderedPage = null;
 const counterHistory = new Map();
@@ -109,6 +113,36 @@ function render() {
   }
 }
 function navigate(next) { if (!Object.hasOwn(pages,next)) return; page=next; location.hash=next; render(); window.scrollTo({top:0,behavior:'instant'}); }
+function saveKeyboard(settings) {
+  try { shortcuts = writeShortcuts(localStorage, settings); }
+  catch (error) {
+    if (/andere Taste|einzelne|Ungültige/.test(error.message)) throw error;
+    throw new Error('Die Tastaturbelegung konnte in diesem Browser nicht gespeichert werden.');
+  }
+  shortcutDraft = structuredClone(shortcuts); shortcutDirty = false; render();
+  toast('Tastaturbelegung gespeichert.');
+}
+function keyboardDirty() {
+  shortcutDirty = true;
+  const node = root.querySelector('#shortcut-status'); if (node) node.textContent = 'Noch nicht gespeichert.';
+  const error = root.querySelector('#shortcut-error'); if (error) error.textContent = '';
+}
+window.addEventListener('storage', event => {
+  if (event.key !== SHORTCUT_STORAGE_KEY) return;
+  shortcuts = readShortcuts(localStorage);
+  if (!shortcutDirty) shortcutDraft = structuredClone(shortcuts);
+  render();
+});
+root.addEventListener('keydown', event => {
+  const input = event.target.closest('input[data-shortcut]'); if (!input) return;
+  if (event.key === 'Tab' || event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
+  if (event.key === 'Escape') { input.blur(); return; }
+  if (event.key === 'Shift') return;
+  event.preventDefault(); event.stopPropagation();
+  const key = normalizeShortcutKey(event.key);
+  if (!key) { root.querySelector('#shortcut-error').textContent = 'Bitte einen Buchstaben, eine Ziffer, eine Pfeiltaste oder die Leertaste drücken.'; return; }
+  shortcutDraft.bindings[input.dataset.shortcut] = key; input.value = shortcutLabel(key); keyboardDirty();
+});
 window.addEventListener('hashchange',()=>{const target=authCallbackTarget(location.href);if(target){location.replace(target);return;}const next=location.hash.slice(1); if(Object.hasOwn(pages,next)&&page!==next){page=next;render();}});
 function modal(title, body, submitLabel, handler) {
   dialog.innerHTML=`<form id="modal-form"><div class="dialog-head"><h2 id="dialog-title">${title}</h2><button type="button" data-close aria-label="Dialog schließen">${icon('close')}</button></div>${body}<div class="dialog-error" role="alert" id="modal-error"></div><div class="dialog-actions"><button type="button" data-close class="quiet">Abbrechen</button><button type="submit" class="primary">${submitLabel}</button></div></form>`;
@@ -167,6 +201,7 @@ async function undo(player) {
   await store.mutate('undo',{player_id:player,change_id:change.id,expected_revision:change.round_id?roundCount(s,change.round_id,player).revision:0});
 }
 const actions={
+  'shortcuts-reset':()=>saveKeyboard(defaultShortcuts()),
   'increment':b=>add(b.dataset.player,Number(b.dataset.delta)),
   'undo':b=>undo(b.dataset.player),
   'switch':b=>store.selectActor(b.dataset.player),
@@ -191,19 +226,26 @@ root.addEventListener('click',async event=>{
   try{await actions[b.dataset.action](b);}catch(error){toast(error.message,'error');}
 });
 root.addEventListener('submit',async event=>{
+  if(event.target.id==='shortcuts-form'){
+    event.preventDefault();
+    try{saveKeyboard(shortcutDraft);}catch(error){root.querySelector('#shortcut-error').textContent=error.message;}
+    return;
+  }
   if(event.target.id!=='login-form')return;event.preventDefault();const form=new FormData(event.target),b=event.submitter;b.disabled=true;b.classList.add('is-loading');b.setAttribute('aria-busy','true');
   try{await store.login(form.get('email'),form.get('password'));}catch(error){const node=document.querySelector('#login-error');if(node)node.textContent=error.message;else toast(error.message,'error');}finally{b.disabled=false;b.classList.remove('is-loading');b.removeAttribute('aria-busy');}
 });
-root.addEventListener('change',event=>{if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);});
+root.addEventListener('change',event=>{if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}});
 root.addEventListener('input',event=>{
   if(event.target.id==='rng-range')document.querySelector('#rng-percent').value=event.target.value;
   if(event.target.id==='rng-percent'&&event.target.value!==''&&Number.isFinite(Number(event.target.value)))document.querySelector('#rng-range').value=Math.min(1,Math.max(.001,Number(event.target.value)));
   if(['rng-percent','rng-chests','rng-range'].includes(event.target.id))renderRng();
 });
 document.addEventListener('keydown',async event=>{
-  if(dialog.open||event.repeat||event.ctrlKey||event.metaKey||event.altKey||event.target.closest('input,select,textarea,[contenteditable="true"]')||!store.state)return;
-  const key=event.key.toLowerCase();
-  try{if((key==='m'&&store.actor==='max')||(key==='s'&&store.actor==='szymon')){event.preventDefault();await add(store.actor,1);}else if(key==='u'){event.preventDefault();await undo(store.actor);}}catch(error){toast(error.message,'error');}
+  if(!store.state)return;
+  const action=shortcutAction(event,shortcuts,store.actor,{dialogOpen:dialog.open,editable:Boolean(event.target.closest('input,select,textarea,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="combobox"]')),interactive:Boolean(event.target.closest('button,a[href],summary,[role="button"]'))});
+  if(!action)return;
+  event.preventDefault();
+  try{if(action==='increment')await add(store.actor,1);else await undo(store.actor);}catch(error){toast(error.message,'error');}
 });
 setInterval(()=>{
   root.querySelectorAll('[data-timer]').forEach(node=>{node.textContent=duration(secondsSince(node.dataset.timer));});

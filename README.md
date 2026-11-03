@@ -130,9 +130,17 @@ Die Website speichert Passwörter weder im Projekt noch im eigenen Browserspeich
 
 - Ohne Session könnt ihr Truhen direkt auf eurem persönlichen Counter zählen. Diese erscheinen im Tagesdiagramm und in der Gesamtsumme, gehören aber keiner Runde oder Session an.
 - Für auswertbare Farmrunden zuerst **Session starten**, dann **Runde starten**. Während einer aktiven Session ist eine laufende Runde Voraussetzung für Live-Klicks.
-- **+1**, **+5** und **+10** zählen zum eigenen Account. Max nutzt alternativ **M**, Szymon **S**. **U** nimmt den eigenen letzten geeigneten Live-Klick zurück. Gedrückthalten wiederholt nicht automatisch.
+- **+1**, **+5** und **+10** zählen zum eigenen Account. Standardmäßig nutzt Max alternativ **M**, Szymon **S**. **U** nimmt den eigenen letzten geeigneten Live-Klick zurück. Gedrückthalten wiederholt nicht automatisch.
 - Die Gegenkarte ist absichtlich gesperrt. In der Demo könnt ihr den Testspieler wechseln.
 - „Rückgängig“ kehrt einen Live-Klick genau einmal um. Nach einer absoluten Korrektur oder einem Rundenabschluss bitte den Rundengesamtwert im Rundenbuch bearbeiten. Die Oberfläche lädt für die schnelle Undo-Funktion die jüngsten 200 Änderungen; ältere Runden lassen sich weiterhin bearbeiten.
+
+### Tastaturbelegung anpassen
+
+Unter **Einstellungen → Tastaturbelegung** ein Tastenfeld anklicken, die gewünschte Taste drücken und **Belegung speichern** wählen. Erlaubt sind einzelne Buchstaben, Ziffern, Pfeiltasten und die Leertaste. Rückgängig muss eine andere Taste als +1 verwenden. Max und Szymon dürfen dieselbe +1-Taste verwenden, weil nur der eigene Spieler zählt.
+
+Die Belegung gilt für diesen Browser, bleibt nach Neuladen erhalten und wird zwischen seinen Tabs geteilt. Sie wird nicht im Supabase-Konto gespeichert. Der Schalter **Tastenkürzel aktiv** schaltet die Kürzel aus; **Standard wiederherstellen** aktiviert wieder M / S / U. Die Zählwerke zeigen die aktuell gespeicherten Tasten an. Nicht gespeicherte Änderungen wirken sich noch nicht auf das Zählen aus.
+
+In Eingabefeldern und Dialogen zählen Tastenkürzel nicht. Strg-/Alt-/Cmd-Kombinationen bleiben beim Browser. Auf fokussierten Buttons und Links behält die Leertaste ihre normale Funktion. Speicherfehler und widersprüchliche Belegungen werden angezeigt, ohne die bisherige Belegung zu überschreiben.
 
 ### Nach einer Runde eintragen – ohne Doppelzählung
 
@@ -171,7 +179,7 @@ Browserspeicher nicht löschen und Privatmodus nicht schließen, solange Anfrage
 Ohne zusätzliche Bibliotheken, mit Node.js 22+:
 
 ```sh
-node --test tests/core.test.mjs tests/store.test.mjs
+node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs
 ```
 
 SQL zusätzlich mit einer lokalen PostgreSQL-WASM-Engine (PGlite) testen:

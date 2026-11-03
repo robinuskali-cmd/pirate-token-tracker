@@ -5,10 +5,10 @@ Stand: 3. November 2026. Das Redesign verändert Darstellung, Navigation und Bed
 ## Automatisierte Funktionstests
 
 ```text
-node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs
+node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs
 
-tests   35
-pass    35
+tests   43
+pass    43
 fail     0
 skipped  0
 ```
@@ -90,6 +90,12 @@ Hover-, gedrückte, gesperrte, Fokus-, Lade- und Fehlerzustände sind definiert.
 - Ersten Tab neu geladen: Anmeldung und Cloud-Stand 501 / 1.100 blieben erhalten; Realtime verband sich wieder.
 - Den Testklick über Rückgängig zurückgenommen. Beide Tabs zeigten wieder Max 500 / Szymon 1.100 / Team 1.600. Beide Warteschlangen waren leer und die Tages-Nettoänderung wieder 0.
 - Der Test hinterlässt die regulären zwei Audit-Einträge (+1 und Undo −1), keine zusätzliche Session oder Runde. Der zusätzliche Testtab wurde geschlossen.
+
+## Anpassbare Tastaturbelegung · 3. November 2026
+
+Acht zusätzliche Tests prüfen Standardwerte, Normalisierung, dauerhafte Speicherung und Ausschalten, Konflikte mit Undo, beschädigten/gesperrten Speicher, Spielerzuordnung sowie Eingabefelder, Dialoge, gehaltene Tasten, IME und Browser-Kombinationen. Leertaste auf fokussierten Buttons erzeugt keine zusätzliche Zählaktion. Die bestehenden Daten- und Auth-Tests bestehen unverändert.
+
+Die Belegung wird getrennt von Tracker-Daten lokal gespeichert. Ungespeicherte Entwürfe überstehen das normale Neurendern der Oberfläche; erfolgreiche Speicheränderungen werden über das Storage-Ereignis in anderen Tabs übernommen. Es werden keine Supabase-Berechtigungen oder Zählregeln geändert.
 
 ## Grenzen
 
