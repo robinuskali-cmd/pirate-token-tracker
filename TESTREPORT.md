@@ -5,10 +5,10 @@ Stand: 3. November 2026. Das Redesign verändert Darstellung, Navigation und Bed
 ## Automatisierte Funktionstests
 
 ```text
-node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs
+node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs
 
-tests   27
-pass    27
+tests   35
+pass    35
 fail     0
 skipped  0
 ```
@@ -82,6 +82,8 @@ Hover-, gedrückte, gesperrte, Fokus-, Lade- und Fehlerzustände sind definiert.
 - Das [Deployment der Supabase-Konfiguration](https://github.com/schafermax809-arch/pirate-token-tracker/actions/runs/41710644862) war erfolgreich. Die ausgelieferte Konfiguration enthält die richtige Projekt-URL und einen öffentlichen Publishable Key; die Website lädt anschließend das echte Anmeldeformular.
 
 ## Grenzen
+
+Die Passwortverwaltung wurde um acht automatisierte Prüfungen mit einer simulierten Auth-API ergänzt: Eingabevalidierung, bestätigte Sitzung, Prüfung des bisherigen Passworts, Abbruch bei Benutzerwechsel/abgelaufener Sitzung, Recovery-Modus, unverändertes Redirect-Ziel, generische Rücksetz-Antwort sowie verständliche SMTP-/Ratenlimit-Fehler. Der Browser zeigt das Rücksetzformular; der Link auf der Anmeldeseite sowie ein abgelaufener Link zur Website-Wurzel wurden geprüft. Auth-Fragmente werden nach Verarbeitung aus der URL entfernt. Eine echte Rücksetz-E-Mail und eine Änderung echter Zugangsdaten wurden bewusst nicht ausgeführt; deren Ausführung erfolgt durch den Benutzer.
 
 Noch nicht end-to-end geprüft sind echter Spielerlogin, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen und zwei physische Geräte. Die Anmeldung erfordert das vom Nutzer selbst gesetzte Tracker-Passwort. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
 

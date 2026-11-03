@@ -116,6 +116,16 @@ Der Workflow führt die Kern- und Warteschlangentests vor dem Deployment aus. F�
 
 ## Bedienung
 
+### Tracker-Passwort ändern oder zurücksetzen
+
+- Angemeldet: **Einstellungen → Passwort ändern**. Bisheriges Passwort bestätigen und ein neues Passwort mit mindestens 12 Zeichen zweimal eingeben.
+- Vergessen: Auf der Anmeldeseite **Passwort vergessen?** öffnen oder direkt [Passwort zurücksetzen](https://schafermax809-arch.github.io/pirate-token-tracker/account.html#reset). Die eigene Spieler-E-Mail eingeben und den Rücksetzlink selbst anfordern. Im E-Mail-Link ein neues Passwort setzen; Truhen und Runden bleiben erhalten.
+- In Supabase muss die genaue URL `https://schafermax809-arch.github.io/pirate-token-tracker/account.html` unter **Authentication → URL Configuration → Redirect URLs** erlaubt sein. Für dieses Projekt ist sie bereits eingetragen. Bei einer Kopie des Projekts die eigene Adresse verwenden.
+- Abgelaufene Links zeigen eine Meldung und die Möglichkeit, einen neuen Link anzufordern. Alte Supabase-Dashboard-Rücksetzlinks zur Website-Wurzel werden ebenfalls zur Passwortseite geleitet.
+- Supabase übernimmt den E-Mail-Versand. Bei Ratenlimits später erneut versuchen; bei nicht freigegebenen Empfängeradressen muss der Projektinhaber eigenen SMTP-Versand konfigurieren. Es wurde keine Rücksetz-E-Mail automatisch versendet und kein echtes Passwort zum Test geändert.
+
+Die Website speichert Passwörter weder im Projekt noch im eigenen Browserspeicher. Die normalen Supabase-Anmeldesitzungen bleiben davon getrennt bestehen. Die Implementierung verwendet [resetPasswordForEmail](https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail) und [updateUser](https://supabase.com/docs/reference/javascript/auth-updateuser).
+
 ### Live zählen
 
 - Ohne Session könnt ihr Truhen direkt auf eurem persönlichen Counter zählen. Diese erscheinen im Tagesdiagramm und in der Gesamtsumme, gehören aber keiner Runde oder Session an.

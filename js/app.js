@@ -1,9 +1,12 @@
 import { TrackerStore } from './store.js';
 import { createViews } from './views.js';
 import { icon } from './icons.js';
+import { authCallbackTarget } from './account-service.js';
 import { number as n, escapeHtml as e, duration, secondsSince, integer, activeSession, activeRound, roundCount, roundTotal, roundSeconds, totalChests, nextMilestone, dropProbability, requiredChests } from './core.js';
 
 const root = document.querySelector('#app'), dialog = document.querySelector('#dialog');
+const authRedirect = authCallbackTarget(location.href);
+if (authRedirect) location.replace(authRedirect);
 const store = new TrackerStore();
 const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'] };
 let page = Object.hasOwn(pages, location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
@@ -80,7 +83,7 @@ function counterFeedback() {
   }
 }
 function loginPage() {
-  return `<div class="login-wrap"><div class="eyebrow">${icon('shield')}Private Crew</div><h1>Willkommen an Bord.</h1><p>Dein Logbuch wartet. Melde dich mit deinem freigeschalteten Spieleraccount an.</p><section class="panel"><form id="login-form"><label class="field"><span>E-Mail</span><input type="email" name="email" required autocomplete="username"></label><label class="field"><span>Passwort</span><input type="password" name="password" required autocomplete="current-password"></label><button type="submit" class="primary">${icon('arrow')}Anmelden</button><p id="login-error" class="dialog-error" role="alert"></p></form></section><p class="tab-note">Zugang nur für Max und Szymon. Accounts werden im Supabase Dashboard eingerichtet.</p>${button('mode','Lokale Demo ausprobieren','play','quiet')}</div>`;
+  return `<div class="login-wrap"><div class="eyebrow">${icon('shield')}Private Crew</div><h1>Willkommen an Bord.</h1><p>Dein Logbuch wartet. Melde dich mit deinem freigeschalteten Spieleraccount an.</p><section class="panel"><form id="login-form"><label class="field"><span>E-Mail</span><input type="email" name="email" required autocomplete="username"></label><label class="field"><span>Passwort</span><input type="password" name="password" required autocomplete="current-password"></label><button type="submit" class="primary">${icon('arrow')}Anmelden</button><p id="login-error" class="dialog-error" role="alert"></p></form><a class="account-link" href="./account.html#reset">Passwort vergessen?</a></section><p class="tab-note">Zugang nur für Max und Szymon. Accounts werden im Supabase Dashboard eingerichtet.</p>${button('mode','Lokale Demo ausprobieren','play','quiet')}</div>`;
 }
 function render() {
   if (pointerHeld) { renderDeferred = true; return; }
@@ -106,7 +109,7 @@ function render() {
   }
 }
 function navigate(next) { if (!Object.hasOwn(pages,next)) return; page=next; location.hash=next; render(); window.scrollTo({top:0,behavior:'instant'}); }
-window.addEventListener('hashchange',()=>{const next=location.hash.slice(1); if(Object.hasOwn(pages,next)&&page!==next){page=next;render();}});
+window.addEventListener('hashchange',()=>{const target=authCallbackTarget(location.href);if(target){location.replace(target);return;}const next=location.hash.slice(1); if(Object.hasOwn(pages,next)&&page!==next){page=next;render();}});
 function modal(title, body, submitLabel, handler) {
   dialog.innerHTML=`<form id="modal-form"><div class="dialog-head"><h2 id="dialog-title">${title}</h2><button type="button" data-close aria-label="Dialog schließen">${icon('close')}</button></div>${body}<div class="dialog-error" role="alert" id="modal-error"></div><div class="dialog-actions"><button type="button" data-close class="quiet">Abbrechen</button><button type="submit" class="primary">${submitLabel}</button></div></form>`;
   dialog.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dialog.close()));
@@ -212,4 +215,4 @@ setInterval(()=>{
   }
 },1000);
 store.addEventListener('change',render);
-try{await store.init();}catch(error){store.status='error';store.fail(error);}
+if (!authRedirect) { try{await store.init();}catch(error){store.status='error';store.fail(error);} }

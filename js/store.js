@@ -53,7 +53,7 @@ export class TrackerStore extends EventTarget {
     clearInterval(this.poll);
     if (this.channel) await this.client.removeChannel(this.channel);
     this.user = user || null; this.actor = null; this.state = null; this.queue = []; this.error = '';
-    if (!user) { this.status = 'signedout'; this.emit(); return; }
+    if (!user) { sessionStorage.removeItem(`pirate-tracker:password-recovery:${config.supabaseUrl}`); this.status = 'signedout'; this.emit(); return; }
     this.queue = this.readQueue();
     const cached = localStorage.getItem(this.cacheKey);
     if (cached) { this.state = JSON.parse(cached); this.actor = this.state.players.find(p => p.auth_id === user.id)?.id || null; }

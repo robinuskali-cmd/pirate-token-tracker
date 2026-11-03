@@ -22,11 +22,11 @@ jobs:
         with:
           node-version: '22'
       - name: Test counter and durable queue
-        run: node --test tests/core.test.mjs tests/store.test.mjs
+        run: node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs
       - name: Prepare static files
         run: |
           mkdir _site
-          cp index.html .nojekyll README.md DESIGN.md TESTREPORT.md _site/
+          cp index.html account.html .nojekyll README.md DESIGN.md TESTREPORT.md _site/
           cp -r assets js supabase _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
