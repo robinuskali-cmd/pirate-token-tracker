@@ -2,7 +2,7 @@
 
 Ein privates Truhen-Logbuch für **Max (500 Starttruhen)** und **Szymon (1.100 Starttruhen)**. Statische Website in HTML, CSS und JavaScript mit ES-Modulen. Kein Build-Schritt für die Website erforderlich.
 
-**Lieferstatus:** Vollständiger Quellcode, lauffähige Demo, Supabase-Schema und automatisches GitHub-Pages-Deployment. Das öffentliche [Repository](https://github.com/schafermax809-arch/pirate-token-tracker) enthält den aktuellen Stand. Die Website wird unter [Pirate Token Tracker](https://schafermax809-arch.github.io/pirate-token-tracker/) veröffentlicht. Supabase ist noch nicht eingerichtet; bis dahin speichert die Demo nur im Browser. Die echte Geräte-Synchronisierung ist erst nach der folgenden Einrichtung verfügbar.
+**Lieferstatus:** Die [Website](https://schafermax809-arch.github.io/pirate-token-tracker/) und das öffentliche [Repository](https://github.com/schafermax809-arch/pirate-token-tracker) sind veröffentlicht. Das Supabase-Projekt in Frankfurt ist angelegt; Tabellen, RPCs, Startwerte, RLS und Realtime-Publication sind eingerichtet. Die öffentlichen Verbindungsdaten stehen in `js/config.js`. Noch erforderlich: die beiden Spielerzugänge anlegen und ihren Spielerrollen zuordnen. Erst danach ist die gemeinsame Speicherung nutzbar. Die optionale Demo speichert weiterhin ausschließlich im Browser.
 
 ## Interface 1.1 · Visuelles Redesign
 
@@ -185,7 +185,7 @@ Geprüft wurden:
 - RNG-Randfälle einschließlich 0/100 %, null Truhen und sehr kleinen Wahrscheinlichkeiten.
 - Mobile Browserbedienung einschließlich Session, Live-Counter, absolutem Rundeneintrag und Neuladen.
 
-Die lokale PostgreSQL-Engine führt Abfragen innerhalb einer Instanz nacheinander aus. Sie prüft echte SQL-Funktionen und Rechte, ersetzt aber **keinen Test mit zwei parallelen PostgreSQL-Verbindungen oder einem echten Supabase-Realtime-WebSocket**. Ohne Supabase-Projekt sind der echte Auth-E-Mail-/Passwort-Login, Token-Refresh und zwei physische Geräte noch nicht end-to-end geprüft. GitHub Pages wurde am 3. November 2026 erfolgreich veröffentlicht; Zählen, Speichern nach Neuladen und Rückgängig wurden auf der HTTPS-Seite geprüft. Im Redesign wurden alle fünf Bereiche bei 320, 390, 768, 1.024 und 1.440 Pixeln in einer lokalen Browser-Testansicht geprüft. Details stehen in TESTREPORT.md.
+Die lokale PostgreSQL-Engine führt Abfragen innerhalb einer Instanz nacheinander aus. Sie prüft echte SQL-Funktionen und Rechte, ersetzt aber **keinen Test mit zwei parallelen PostgreSQL-Verbindungen oder einem echten Supabase-Realtime-WebSocket**. Das echte Supabase-Schema, die Startwerte, aktiviertes RLS und die Realtime-Publication wurden geprüft; ein anonymer Snapshot-Abruf wird mit HTTP 401 / SQLSTATE 42501 abgelehnt. Echter Spielerlogin, Token-Refresh und zwei physische Geräte sind bis zur Einrichtung der Spielerzugänge noch nicht end-to-end geprüft. GitHub Pages wurde am 3. November 2026 erfolgreich veröffentlicht; Zählen, Speichern nach Neuladen und Rückgängig wurden im Demo-Modus auf der HTTPS-Seite geprüft. Im Redesign wurden alle fünf Bereiche bei 320, 390, 768, 1.024 und 1.440 Pixeln in einer lokalen Browser-Testansicht geprüft. Details stehen in TESTREPORT.md.
 
 ### Abnahmetest nach der Einrichtung
 

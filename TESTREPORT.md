@@ -15,7 +15,7 @@ skipped  0
 
 Die Tests prüfen Startwerte, Summen, Idempotenz, Undo, Rundengesamtwerte, Konflikte, Eingabevalidierung, lokale Warteschlangen, Netzwerkfehler vor dem Empfang und nach dem Commit sowie echte PostgreSQL-Funktionen/RLS in PGlite 0.3.14. Zwei simulierte lokale Tabs legen 60 Anfragen gleichzeitig ab.
 
-Die SHA-256-Prüfsummen von `js/store.js`, `js/core.js`, `js/config.js` und `supabase/schema.sql` sind gegenüber der vorherigen Version unverändert.
+Beim Redesign blieben die SHA-256-Prüfsummen von `js/store.js`, `js/core.js`, `js/config.js` und `supabase/schema.sql` gegenüber der vorherigen Version unverändert. Anschließend wurden für die Cloud-Einrichtung ausschließlich die öffentlichen Projektwerte in `js/config.js` ergänzt.
 
 ## Responsive Browserprüfung
 
@@ -67,10 +67,21 @@ Hover-, gedrückte, gesperrte, Fokus-, Lade- und Fehlerzustände sind definiert.
 - Die [veröffentlichte HTTPS-Seite](https://schafermax809-arch.github.io/pirate-token-tracker/) lädt Oberfläche und Module im Repository-Unterpfad korrekt.
 - Startwerte 500 / 1.100 / Team 1.600 geprüft. Ein +1-Klick ergab 501 / Team 1.601 und blieb nach Neuladen erhalten. Rückgängig stellte 500 / Team 1.600 wieder her.
 - Alle 27 lokalen Funktionstests vor der Veröffentlichung erneut bestanden. Der Pages-Workflow prüft zusätzlich Kern- und Warteschlangenlogik vor jedem Deployment.
-- Die veröffentlichte Website verwendet aktuell den lokalen Demo-Modus, da Supabase noch nicht eingerichtet ist.
+- Beim ersten Pages-Deployment wurde der lokale Demo-Modus geprüft. Die Supabase-Verbindung wurde anschließend ergänzt.
+
+## Supabase-Einrichtung · 3. November 2026
+
+- Neues Projekt `pirate-token-tracker` in Central EU (Frankfurt), Zustand Healthy.
+- Leere Datenbank vor der Installation festgestellt; das ausgelieferte `supabase/schema.sql` erfolgreich ausgeführt.
+- Startwerte Max 500 / Szymon 1.100 bestätigt. RLS ist auf allen sechs Tracker-Tabellen einschließlich `tracker_private.requests` aktiv; die fünf öffentlichen Tracker-Tabellen sind in `supabase_realtime` enthalten.
+- E-Mail-Anmeldung aktiv, öffentliche Neuregistrierungen und anonyme Anmeldung deaktiviert.
+- GitHub-Pages-Adresse als Site URL und genaue erlaubte Redirect-URL gespeichert.
+- Öffentliche Projekt-URL und Publishable Key in der Website konfiguriert. Keine Datenbankpasswörter oder Secret-/Service-Role-Keys im Quellcode.
+- Auth-Settings-API mit dem öffentlichen Key erreichbar (HTTP 200). Unangemeldeter Aufruf von `tracker_snapshot` wird abgelehnt (HTTP 401, SQLSTATE 42501: permission denied for function tracker_snapshot).
+- Die beiden Spielerzugänge und ihre Rollen-Zuordnung sind noch einzurichten; ein echter Spielerlogin und Realtime zwischen angemeldeten Geräten wurden noch nicht geprüft.
 
 ## Grenzen
 
-Ohne eingerichtetes Supabase-Projekt bleiben echter Supabase-Login, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen und zwei physische Geräte ungeprüft. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
+Bis zur Einrichtung der Spielerzugänge bleiben echter Supabase-Login, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen und zwei physische Geräte ungeprüft. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
 
 Der Cloud-Abnahmetest steht weiterhin in `README.md`.
