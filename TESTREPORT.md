@@ -97,6 +97,17 @@ Acht zusätzliche Tests prüfen Standardwerte, Normalisierung, dauerhafte Speich
 
 Die Belegung wird getrennt von Tracker-Daten lokal gespeichert. Ungespeicherte Entwürfe überstehen das normale Neurendern der Oberfläche; erfolgreiche Speicheränderungen werden über das Storage-Ereignis in anderen Tabs übernommen. Es werden keine Supabase-Berechtigungen oder Zählregeln geändert.
 
+Das [Pages-Deployment](https://github.com/schafermax809-arch/pirate-token-tracker/actions/runs/41724422726) war erfolgreich. Auf der veröffentlichten Website im lokalen Demo-Modus geprüft:
+
+- Felder mit Q / W / Q belegt: Speichern zeigt den Undo-Konflikt und übernimmt die ungültige Belegung nicht.
+- Auf Q / W / Z korrigiert und gespeichert. Nach vollständigem Neuladen bleiben alle drei Tasten erhalten.
+- Ausgangswert Max 500. M zählt nicht mehr, Q zählt genau einmal auf 501. Z stellt 500 wieder her.
+- Kürzel ausgeschaltet und gespeichert. Q verändert den Demo-Zähler nicht.
+- Max auf Leertaste gelegt: Die Taste wird als „Leertaste“ am +1-Button angezeigt. Leertaste auf dem fokussierten +1-Button zählt genau einmal auf 501; U stellt 500 wieder her.
+- Standard wiederhergestellt: aktiv, M / S / U. Anschließend zum angemeldeten Live-Modus zurückgekehrt. Bei diesen Prüfungen wurden keine Cloud-Zählaktionen ausgeführt. Screenshot der neuen Einstellungen liegt im Ausgabeverzeichnis.
+
+Die oben dokumentierte Prüfung mit 25 Viewport-Kombinationen betrifft das ursprüngliche Redesign. Die neue Tastatursektion wurde zusätzlich in der aktuellen Browserbreite visuell geprüft; die vollständige Viewport-Matrix wurde dafür nicht wiederholt.
+
 ## Grenzen
 
 Die Passwortverwaltung wurde um acht automatisierte Prüfungen mit einer simulierten Auth-API ergänzt: Eingabevalidierung, bestätigte Sitzung, Prüfung des bisherigen Passworts, Abbruch bei Benutzerwechsel/abgelaufener Sitzung, Recovery-Modus, unverändertes Redirect-Ziel, generische Rücksetz-Antwort sowie verständliche SMTP-/Ratenlimit-Fehler. Der Browser zeigt das Rücksetzformular; der Link auf der Anmeldeseite sowie ein abgelaufener Link zur Website-Wurzel wurden geprüft. Auth-Fragmente werden nach Verarbeitung aus der URL entfernt. Das Versenden echter Rücksetz-E-Mails und Ändern echter Zugangsdaten wurden nicht vom Agenten ausgeführt; diese Schritte übernimmt der Benutzer. Die E-Mail-Zustellung und der Passwortwechsel selbst wurden nicht beobachtet.
