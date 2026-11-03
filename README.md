@@ -185,7 +185,7 @@ Geprüft wurden:
 - RNG-Randfälle einschließlich 0/100 %, null Truhen und sehr kleinen Wahrscheinlichkeiten.
 - Mobile Browserbedienung einschließlich Session, Live-Counter, absolutem Rundeneintrag und Neuladen.
 
-Die lokale PostgreSQL-Engine führt Abfragen innerhalb einer Instanz nacheinander aus. Sie prüft echte SQL-Funktionen und Rechte, ersetzt aber **keinen Test mit zwei parallelen PostgreSQL-Verbindungen oder einem echten Supabase-Realtime-WebSocket**. Ohne Cloud-Zugang sind der echte Auth-E-Mail-/Passwort-Login, Token-Refresh, zwei physische Geräte und GitHub-Pages-Deployment noch nicht end-to-end geprüft. Im Redesign wurden alle fünf Bereiche bei 320, 390, 768, 1.024 und 1.440 Pixeln in einer lokalen Browser-Testansicht geprüft. Details stehen in TESTREPORT.md.
+Die lokale PostgreSQL-Engine führt Abfragen innerhalb einer Instanz nacheinander aus. Sie prüft echte SQL-Funktionen und Rechte, ersetzt aber **keinen Test mit zwei parallelen PostgreSQL-Verbindungen oder einem echten Supabase-Realtime-WebSocket**. Ohne Supabase-Projekt sind der echte Auth-E-Mail-/Passwort-Login, Token-Refresh und zwei physische Geräte noch nicht end-to-end geprüft. GitHub Pages wurde am 3. November 2026 erfolgreich veröffentlicht; Zählen, Speichern nach Neuladen und Rückgängig wurden auf der HTTPS-Seite geprüft. Im Redesign wurden alle fünf Bereiche bei 320, 390, 768, 1.024 und 1.440 Pixeln in einer lokalen Browser-Testansicht geprüft. Details stehen in TESTREPORT.md.
 
 ### Abnahmetest nach der Einrichtung
 

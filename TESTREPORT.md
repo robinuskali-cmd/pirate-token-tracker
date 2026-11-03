@@ -60,8 +60,17 @@ Die zentralen Farbpaare wurden rechnerisch geprüft:
 
 Hover-, gedrückte, gesperrte, Fokus-, Lade- und Fehlerzustände sind definiert. Formularaktionen zeigen Ladefeedback und `aria-busy`. Die CSS-Regeln und die JavaScript-Abfrage für `prefers-reduced-motion` deaktivieren Bewegungsfeedback und den Sekundenzeiger; das Betriebssystem wurde zum Testen nicht umgestellt. Externe Webfonts haben lokale Fallbacks.
 
+## GitHub Pages · 3. November 2026
+
+- Öffentliches [Repository](https://github.com/schafermax809-arch/pirate-token-tracker) angelegt und alle 24 Projektdateien hochgeladen; keine Testabhängigkeiten oder privaten Zugangsdaten veröffentlicht.
+- GitHub Pages verwendet den enthaltenen GitHub-Actions-Workflow. Der [erste Deployment-Lauf](https://github.com/schafermax809-arch/pirate-token-tracker/actions/runs/41698542856) war erfolgreich.
+- Die [veröffentlichte HTTPS-Seite](https://schafermax809-arch.github.io/pirate-token-tracker/) lädt Oberfläche und Module im Repository-Unterpfad korrekt.
+- Startwerte 500 / 1.100 / Team 1.600 geprüft. Ein +1-Klick ergab 501 / Team 1.601 und blieb nach Neuladen erhalten. Rückgängig stellte 500 / Team 1.600 wieder her.
+- Alle 27 lokalen Funktionstests vor der Veröffentlichung erneut bestanden. Der Pages-Workflow prüft zusätzlich Kern- und Warteschlangenlogik vor jedem Deployment.
+- Die veröffentlichte Website verwendet aktuell den lokalen Demo-Modus, da Supabase noch nicht eingerichtet ist.
+
 ## Grenzen
 
-Ohne eingerichtetes Supabase-Projekt und GitHub-Repository bleiben echter Supabase-Login, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen, zwei physische Geräte und Pages-Deployment ungeprüft. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
+Ohne eingerichtetes Supabase-Projekt bleiben echter Supabase-Login, Realtime-WebSocket, Token-Refresh, parallele Serververbindungen und zwei physische Geräte ungeprüft. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
 
 Der Cloud-Abnahmetest steht weiterhin in `README.md`.
