@@ -12,4 +12,4 @@ The request omits credentials and the referring page URL. No microphone audio is
 
 # Jarvis
 
-Die selbst geschriebenen Jarvis-Texte wurden lokal mit Windows System.Speech (deutsche Stimme Microsoft Stefan) in WAV-Dateien gerendert und mit FFmpeg in MP3 umgewandelt. `jarvis-voice.bin` enthält 288 vollständige MP3-Abschnitte; `js/voice-recordings.js` beschreibt deren Bytebereiche. `jarvis-test.mp3` ist eine separate Testaufnahme. Zur Laufzeit wird keine Browserstimme oder externe TTS-/KI-API verwendet.
+Die selbst geschriebenen Jarvis-Texte wurden lokal mit Windows System.Speech (deutsche Stimme Microsoft Katja, normales Sprechtempo) in WAV-Dateien gerendert und mit FFmpeg in MP3 umgewandelt. `jarvis-voice.bin` enthält 288 vollständige MP3-Abschnitte; `js/voice-recordings.js` beschreibt deren Bytebereiche. `jarvis-test.mp3` ist eine separate Testaufnahme. Zur Laufzeit wird keine Browserstimme oder externe TTS-/KI-API verwendet.

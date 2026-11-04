@@ -159,3 +159,7 @@ Der Cloud-Abnahmetest steht weiterhin in `README.md`.
 Der Nutzer bestätigt: Die Hymne ist hörbar, die Browserstimme nicht. Deshalb verwendet Jarvis jetzt denselben Web-Audio-Kontext wie die Hymne und 288 lokal erzeugte MP3-Abschnitte. Alle WAV-Ausgangsaufnahmen wurden auf nichtleere Audiosignale geprüft (RMS > 80, 16-Bit-PCM). Der Binärcontainer wird auf lückenlose Bytebereiche und vollständige MP3-Header geprüft. Jede Antwortvorlage einschließlich dynamischer Statuswerte, negativer Tageswerte und aller Titel hat passende Aufnahmen.
 
 92 Tests bestanden. Geprüft: Audio-Caches, Zahlenzerlegung, Status, alle Sprüche, Lade-/Decoderfehler, Stopp während Download und Wiedergabe, Ersatz einer Antwort ohne kurzzeitige Freigabe der Erkennung. Browser-QA: echte MP3-Dekodierung und Wiedergabe der Begrüßung, Statusantwort und Stopp. Kein Mikrofon oder echter Zähltest aktiviert. Physische Hörbarkeit muss der Nutzer bestätigen.
+
+## Ruhigere Jarvis-Stimme
+
+Alle 288 Sprachsegmente und der direkte Tontest wurden mit Microsoft Katja in normalem Tempo neu aufgenommen. Neue Versionsparameter verhindern, dass Browser alte Sprachpakete mit neuen Bytebereichen kombinieren. Die vorhandenen Tests prüfen weiterhin die vollständige Zuordnung aller Texte, Zahlen und Titel sowie Wiedergabe, Stop und Fehlerfälle.

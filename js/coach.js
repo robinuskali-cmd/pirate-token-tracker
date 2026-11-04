@@ -1,6 +1,6 @@
 import { battlepassProgress } from './battlepass.js';
 import { number as n } from './core.js';
-import { JARVIS_COMMANDS, matchJarvisCommand } from './jarvis-commands.js?v=recorded-1';
+import { JARVIS_COMMANDS, matchJarvisCommand } from './jarvis-commands.js?v=soft-1';
 
 export const COACH_HELLO='Jarvis an Deck, {name}. Ich bin dein kostenloser lokaler Sprüche-Coach. Schreib zum Beispiel „motivier mich“, „Status“, „Pech“ oder „ich brauche Pause“. Freie KI-Gespräche kann ich nicht führen – freche Kommentare zu deinem Fortschritt schon.';
 export const COACH_UNKNOWN='Dafür habe ich noch keinen passenden Spruch. Ich erkenne Themen wie Motivation, Status, Roast, Pech, Frust und Pause. Probier einen Knopf unten – mein Gehirn ist lokal, mein Größenwahn unbegrenzt.';
