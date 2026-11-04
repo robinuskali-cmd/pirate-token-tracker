@@ -1,7 +1,10 @@
 import { TrackerStore } from './store.js';
-import { createViews } from './views.js?v=anthem-1';
-import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=anthem-1';
-import { AnthemPlayer } from './anthem.js?v=anthem-1';
+import { LocalCoach, coachContext, coachIntent } from './coach.js?v=jarvis-2';
+import { CoachSpeech } from './coach-speech.js?v=jarvis-2';
+import { coachWidget } from './coach-view.js?v=jarvis-2';
+import { createViews } from './views.js?v=jarvis-2';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=jarvis-2';
+import { AnthemPlayer } from './anthem.js?v=jarvis-2';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
@@ -51,6 +54,9 @@ function renderRng() {
 const equippedTitleKey = () => titleStorageKey(store.demo ? 'demo' : store.scope, store.actor);
 const getEquippedTitle = () => equippedReward(localStorage, equippedTitleKey(), store.state?.players.find(p=>p.id===store.actor));
 let voiceSettings=readVoiceSettings(localStorage), voiceDraft=structuredClone(voiceSettings), voiceDirty=false, voiceMode='test', voiceScope='', voiceAudio=null;
+const coach=new LocalCoach();
+let coachSpeech;
+let coachScope='', coachState={open:false,tone:'chaos',readAloud:true,draft:'',messages:[]};
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const currentVoiceScope = () => `${store.demo?'demo':store.scope}:${store.actor}`;
 function voiceTone(action) {
@@ -59,11 +65,13 @@ function voiceTone(action) {
 }
 function getVoiceAudio(){return voiceAudio ||= new (window.AudioContext||window.webkitAudioContext)();}
 const anthem=new AnthemPlayer({getContext:getVoiceAudio,onChange:()=>render()});
-const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:createVoiceLease(navigator.locks),onChange:state=>{if(!state.active)anthem.stop();render();},onFeedback:voiceTone,
+const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:createVoiceLease(navigator.locks),onChange:state=>{if(!state.active){anthem.stop();coachSpeech?.stop();}render();},onFeedback:voiceTone,
+  onCoachCommand:intent=>coachReply(intent,'',true),
   onMediaCommand:action=>{if(action==='anthem-stop')anthem.stop();else void anthem.play();},
   canAct:()=>Boolean(store.state && store.actor && !dialog.open && (!document.hasFocus() || !document.activeElement?.closest('input,textarea,select,[contenteditable="true"]'))),
   onCommand:async action=>{if(voiceScope!==currentVoiceScope())throw new Error('Spielerzugang gewechselt. Sprachsteuerung erneut starten.');if(action.startsWith('add'))await add(store.actor,Number(action.slice(3)));else if(action==='undo')await undo(store.actor);},
 });
+coachSpeech=new CoachSpeech({synthesis:window.speechSynthesis,Utterance:window.SpeechSynthesisUtterance,onBefore:()=>{anthem.stop();voice.suspendForSpeech();},onAfter:()=>voice.resumeAfterSpeech(),onChange:()=>render()});
 const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage, voicePage } = createViews({
   store, pages, button, avatar, connection, saved, displayTotal, pendingFor, date, time, playerName,
   getPage: () => page, getChartDays: () => chartDays,
@@ -71,7 +79,7 @@ const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepas
   getShortcuts: () => shortcuts, getShortcutDraft: () => shortcutDraft, shortcutLabel,
   isShortcutDirty: () => shortcutDirty,
   getEquippedTitle,
-  getVoice:()=>({...voice.state,testMode:voiceMode==='test',commands:voiceSettings.commands,supported:Boolean(SpeechRecognition && navigator.locks?.request),dirty:voiceDirty,music:{...anthem.state,volume:anthem.volume}}),
+  getVoice:()=>({...voice.state,testMode:voiceMode==='test',commands:voiceSettings.commands,supported:Boolean(SpeechRecognition && navigator.locks?.request),dirty:voiceDirty,coachReadAloud:coachState.readAloud,coachSpeech:coachSpeech.state,coachSpeechSupported:coachSpeech.supported,music:{...anthem.state,volume:anthem.volume}}),
   getVoiceDraft:()=>voiceDraft,
 });
 let lastRenderedPage = null;
@@ -114,17 +122,23 @@ function loginPage() {
 function render() {
   if (pointerHeld) { renderDeferred = true; return; }
   const focusId = document.activeElement?.id;
+  const coachSelection=focusId==='coach-input'?[document.activeElement.selectionStart,document.activeElement.selectionEnd]:null;
+  const chatScroll=root.querySelector('.jarvis-chat')?.scrollTop;
+  const nextCoachScope=currentVoiceScope();
+  if(coachScope!==nextCoachScope){coachSpeech?.stop();coachScope=nextCoachScope;coachState={open:false,tone:'chaos',readAloud:true,draft:'',messages:[]};coach.recent=[];}
   const focused = document.activeElement;
-  const focusAttributes = focused?.tagName === 'BUTTON' ? ['action','player','delta','page','round','request','level'].filter(key=>focused.dataset[key]).map(key=>`[data-${key}="${CSS.escape(focused.dataset[key])}"]`).join('') : '';
+  const focusAttributes = focused?.tagName === 'BUTTON' ? ['action','player','delta','page','round','request','level','intent'].filter(key=>focused.dataset[key]).map(key=>`[data-${key}="${CSS.escape(focused.dataset[key])}"]`).join('') : '';
   if (!store.state && !['signedout','error'].includes(store.status)) { root.innerHTML=shell('<div class="empty"><span class="loader" style="display:inline-block"></span><p class="mt">Das Logbuch wird geladen …</p></div>'); return; }
   if (!store.state) root.innerHTML=shell(loginPage());
   else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage,voice:voicePage})[page]());
+  if(store.state)root.insertAdjacentHTML('beforeend',coachWidget(coachState,coachContext(store.state,store.actor)));
+  if(chatScroll!==undefined){const chat=root.querySelector('.jarvis-chat');if(chat)chat.scrollTop=chatScroll;}
   if (page==='rng' && store.state) renderRng();
   updateTableLabels();
   if (lastRenderedPage !== page) root.querySelector('.view')?.classList.add('view-enter');
   lastRenderedPage = page;
   if (store.state) counterFeedback();
-  if (focusId) document.getElementById(focusId)?.focus({preventScroll:true});
+  if (focusId) {const field=document.getElementById(focusId);field?.focus({preventScroll:true});if(coachSelection)field?.setSelectionRange(...coachSelection);}
   else if (focusAttributes) root.querySelector(`button${focusAttributes}`)?.focus({preventScroll:true});
   if (store.state) {
     const total=totalChests(store.state);
@@ -169,7 +183,7 @@ root.addEventListener('keydown', event => {
 });
 window.addEventListener('hashchange',()=>{const target=authCallbackTarget(location.href);if(target){location.replace(target);return;}const next=location.hash.slice(1); if(Object.hasOwn(pages,next)&&page!==next){page=next;render();}});
 function modal(title, body, submitLabel, handler) {
-  anthem.stop();
+  coachSpeech.stop();anthem.stop();
   if(voice.active)voice.stop('Mikrofon vor dem Tracker-Dialog beendet. Bei Bedarf danach erneut starten.');
   dialog.innerHTML=`<form id="modal-form"><div class="dialog-head"><h2 id="dialog-title">${title}</h2><button type="button" data-close aria-label="Dialog schließen">${icon('close')}</button></div>${body}<div class="dialog-error" role="alert" id="modal-error"></div><div class="dialog-actions"><button type="button" data-close class="quiet">Abbrechen</button><button type="submit" class="primary">${submitLabel}</button></div></form>`;
   dialog.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dialog.close()));
@@ -227,10 +241,15 @@ async function undo(player) {
   await store.mutate('undo',{player_id:player,change_id:change.id,expected_revision:change.round_id?roundCount(s,change.round_id,player).revision:0});
 }
 const actions={
+  'coach-toggle':()=>{coachState.open=!coachState.open;if(coachState.open&&!coachState.messages.length){const readAloud=coachState.readAloud;coachState.readAloud=false;coachReply('hello');coachState.readAloud=readAloud;render();}else render();},
+  'coach-close':()=>{coachState.open=false;render();root.querySelector('[data-action="coach-toggle"]')?.focus({preventScroll:true});},
+  'coach-prompt':b=>coachReply(b.dataset.intent),
+  'coach-silence':()=>coachSpeech.stop(),
+  'coach-repeat':()=>{const text=coachState.messages.findLast(m=>m.role==='coach')?.text;if(text)coachSpeech.say(text);},
   'anthem-play':()=>{available();voiceScope=currentVoiceScope();return anthem.play();},
   'anthem-stop':()=>anthem.stop(),
-  'voice-start':async()=>{available();voiceScope=currentVoiceScope();try{anthem.unlock().catch(()=>{});}catch{}await voice.start({commands:voiceSettings.commands,testMode:voiceMode==='test'});},
-  'voice-stop':()=>voice.stop(),
+  'voice-start':async()=>{available();coachSpeech.stop();voiceScope=currentVoiceScope();try{anthem.unlock().catch(()=>{});}catch{}await voice.start({commands:voiceSettings.commands,testMode:voiceMode==='test'});},
+  'voice-stop':()=>{voice.stop();coachSpeech.stop();},
   'voice-pause':()=>voice.pause(),
   'voice-defaults':()=>saveVoice(defaultVoiceSettings()),
   'equip-title':b=>{available();const reward=equipReward(localStorage,equippedTitleKey(),store.state.players.find(p=>p.id===store.actor),Number(b.dataset.level));render();toast(`Titel ausgerüstet: ${reward.title}`);},
@@ -259,6 +278,7 @@ root.addEventListener('click',async event=>{
   try{await actions[b.dataset.action](b);}catch(error){toast(error.message,'error');}
 });
 root.addEventListener('submit',async event=>{
+  if(event.target.id==='coach-form'){event.preventDefault();const text=coachState.draft.trim().slice(0,160);if(text){coachState.draft='';coachReply(coachIntent(text),text);}return;}
   if(event.target.id==='voice-form'){event.preventDefault();try{saveVoice(voiceDraft);}catch(error){root.querySelector('#voice-save-error').textContent=error.message;}return;}
   if(event.target.id==='shortcuts-form'){
     event.preventDefault();
@@ -268,10 +288,20 @@ root.addEventListener('submit',async event=>{
   if(event.target.id!=='login-form')return;event.preventDefault();const form=new FormData(event.target),b=event.submitter;b.disabled=true;b.classList.add('is-loading');b.setAttribute('aria-busy','true');
   try{await store.login(form.get('email'),form.get('password'));}catch(error){const node=document.querySelector('#login-error');if(node)node.textContent=error.message;else toast(error.message,'error');}finally{b.disabled=false;b.classList.remove('is-loading');b.removeAttribute('aria-busy');}
 });
+function coachReply(intent,userText='',fromVoice=false){
+  const context=coachContext(store.state,store.actor);if(!context)return;
+  if(userText)coachState.messages.push({role:'user',text:userText});
+  coachState.messages.push({role:'coach',text:coach.reply(intent,context,coachState.tone)});
+  coachState.messages=coachState.messages.slice(-6);coachState.open=true;render();
+  const chat=root.querySelector('.jarvis-chat');if(chat)chat.scrollTop=chat.scrollHeight;
+  if(coachState.readAloud)coachSpeech.say(coachState.messages.at(-1).text);
+}
+root.addEventListener('keydown',event=>{if(event.key==='Escape'&&coachState.open&&event.target.closest('.jarvis-dock')){event.preventDefault();actions['coach-close']();}});
 function saveVoice(settings){voiceSettings=writeVoiceSettings(localStorage,settings);voiceDraft=structuredClone(voiceSettings);voiceDirty=false;voice.stop('Sprachbefehle gespeichert. Mikrofon bei Bedarf selbst starten.');}
 function dirtyVoice(){voiceDirty=true;const status=root.querySelector('#voice-save-status');if(status)status.textContent='Noch nicht gespeichert.';const error=root.querySelector('#voice-save-error');if(error)error.textContent='';}
-root.addEventListener('change',event=>{if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}if(event.target.id==='voice-mode'){voiceMode=event.target.value==='live'?'live':'test';voice.stop('Modus geändert. Mikrofon selbst erneut starten.');}if(event.target.id==='voice-sound'){voiceDraft.sound=event.target.checked;dirtyVoice();}});
+root.addEventListener('change',event=>{if(['coach-voice-enabled','jarvis-voice-enabled'].includes(event.target.id)){coachState.readAloud=event.target.checked;if(!coachState.readAloud)coachSpeech.stop();render();}if(event.target.id==='coach-tone'){coachState.tone=event.target.value==='gentle'?'gentle':'chaos';}if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}if(event.target.id==='voice-mode'){voiceMode=event.target.value==='live'?'live':'test';voice.stop('Modus geändert. Mikrofon selbst erneut starten.');}if(event.target.id==='voice-sound'){voiceDraft.sound=event.target.checked;dirtyVoice();}});
 root.addEventListener('input',event=>{
+  if(event.target.id==='coach-input')coachState.draft=event.target.value.slice(0,160);
   if(event.target.id==='anthem-volume'){anthem.setVolume(Number(event.target.value)/100);const label=root.querySelector('#anthem-volume-value');if(label)label.textContent=event.target.value+' %';}
   if(event.target.dataset.voiceCommand){voiceDraft.commands[event.target.dataset.voiceCommand]=event.target.value;dirtyVoice();}
   if(event.target.id==='rng-range')document.querySelector('#rng-percent').value=event.target.value;
@@ -294,7 +324,7 @@ setInterval(()=>{
     if(play)play.textContent=duration(s.rounds.reduce((a,r)=>a+(r.manual&&!s.counts.some(c=>c.round_id===r.id&&c.duration_seconds)?0:roundSeconds(s,r)),0)).slice(0,5);
   }
 },1000);
-window.addEventListener('pagehide',()=>{anthem.stop();if(voice.active)voice.stop();voiceAudio?.close().catch(()=>{});voiceAudio=null;});
-document.addEventListener('freeze',()=>{anthem.stop();if(voice.active)voice.stop('Browser hat den Tab angehalten. Bitte selbst erneut starten.');});
+window.addEventListener('pagehide',()=>{coachSpeech.stop();coachState={open:false,tone:'chaos',readAloud:true,draft:'',messages:[]};coach.recent=[];anthem.stop();if(voice.active)voice.stop();voiceAudio?.close().catch(()=>{});voiceAudio=null;});
+document.addEventListener('freeze',()=>{coachSpeech.stop();anthem.stop();if(voice.active)voice.stop('Browser hat den Tab angehalten. Bitte selbst erneut starten.');});
 store.addEventListener('change',()=>{if(voiceScope!==currentVoiceScope()){anthem.stop();if(voice.active)voice.stop('Spielerzugang gewechselt. Mikrofon wurde beendet.');}render();});
 if (!authRedirect) { try{await store.init();}catch(error){store.status='error';store.fail(error);} }

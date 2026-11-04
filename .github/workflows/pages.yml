@@ -22,11 +22,11 @@ jobs:
         with:
           node-version: '22'
       - name: Test counter and durable queue
-        run: node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs tests/voice.test.mjs tests/anthem.test.mjs
+        run: node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs tests/voice.test.mjs tests/anthem.test.mjs tests/coach.test.mjs tests/coach-speech.test.mjs
       - name: Prepare static files
         run: |
           mkdir _site
-          cp index.html account.html ingame.html .nojekyll README.md DESIGN.md TESTREPORT.md _site/
+          cp index.html account.html ingame.html .nojekyll README.md DESIGN.md TESTREPORT.md JARVIS-BEFEHLE.md _site/
           cp -r assets js supabase downloads _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

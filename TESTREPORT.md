@@ -142,4 +142,8 @@ Der Cloud-Abnahmetest steht weiterhin in `README.md`.
 
 ## Hymne per Sprachsteuerung
 
-75 automatische Tests bestanden (inklusive PostgreSQL/RLS), davon 8 neue Prüfungen für Medien-Aliasse, Testmodus ohne Zähländerung, Pause/Stopp, reservierte Befehle, Lade- und Audioprobleme, Wiederholschutz, Lautstärke und Stop während eines Downloads. Browser-QA prüft die echte Ogg-Dekodierung und Wiedergabe bei 0 % Lautstärke, den Stopp-Knopf und das responsive Layout. Mikrofonzugriff und echte Spracheingabe wurden nicht automatisch aktiviert. Audioquelle liefert HTTP 200 mit CORS-Freigabe; Quelle/Lizenz in assets/AUDIO-CREDITS.md.
+89 automatische Tests bestanden (inklusive PostgreSQL/RLS), davon 8 neue Prüfungen für Medien-Aliasse, Testmodus ohne Zähländerung, Pause/Stopp, reservierte Befehle, Lade- und Audioprobleme, Wiederholschutz, Lautstärke und Stop während eines Downloads. Browser-QA prüft die echte Ogg-Dekodierung und Wiedergabe bei 0 % Lautstärke, den Stopp-Knopf und das responsive Layout. Mikrofonzugriff und echte Spracheingabe wurden nicht automatisch aktiviert. Audioquelle liefert HTTP 200 mit CORS-Freigabe; Quelle/Lizenz in assets/AUDIO-CREDITS.md.
+
+## Jarvis
+
+89 Tests bestanden, einschließlich Datenbank/RLS. Geprüft: 39 eindeutige Befehlsformulierungen mit 94 Varianten; mehrere Zufallsantworten pro Befehl; Texte/Eingaben escaped; keine Zähländerung durch Jarvis in Test- und Echtmodus; Berliner Tageswerte und Stufen; Pause/Eingabeschutz; Vorlese-Abbruch, alte Ereignisse, Fehler, Zeitlimit und Wiederaufnahme nur einer zuvor aktiven Erkennung. Browser-QA in lokaler Demo: unterschiedliche Beleidigungs-Konter per Text, echter SpeechSynthesis-Start/Ende, Stopp, Befehlsliste, 323-Pixel-Layout. Kein echter Mikrofonzugriff oder Cloud-Zähltest.

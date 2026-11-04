@@ -101,3 +101,16 @@ test('Musikbefehle laufen auch im Testmodus ohne Zählaktionen; Pause sperrt Sta
 test('Feste Musikbefehle sind vor versehentlicher Belegung als Zählbefehl geschützt',()=>{
  const s=defaultVoiceSettings();for(const phrase of ['Israel','Netanyahu','Netanjahu','Musik stopp','Hymne stoppen'])assert.throws(()=>validateVoiceSettings({...s,commands:{...s.commands,add1:phrase}}),/reserviert/);
 });
+
+test('Jarvis-Befehle verändern im Test- und Echtmodus keinen Zähler; Erkennung wartet auf Sprachende',async()=>{
+ for(const testMode of [true,false]){
+ let f;const replies=[];f=fixture({onCoachCommand:id=>{replies.push(id);f.controller.suspendForSpeech();}});await f.start({testMode});const r=f.instances[0];r.emit('Jarvis du Bastard');assert.deepEqual(replies,['bastard']);assert.equal(f.controller.state.speaking,true);assert.equal(r.aborted,true);r.emit('plus eins');await f.controller.serial;assert.deepEqual(f.calls,[]);
+ f.controller.resumeAfterSpeech();assert.equal(f.instances.length,2);f.next();f.next();f.instances[1].emit('Jarvis Status');assert.deepEqual(replies,['bastard','status']);f.controller.stop();f.controller.resumeAfterSpeech();assert.equal(f.instances.length,2);assert.equal(f.controller.active,false);
+ }
+});
+test('Jarvis respektiert Pause, editierbare Eingaben, Zwischenergebnisse und Wiederholsperre',async()=>{
+ let allowed=true;const replies=[];const f=fixture({onCoachCommand:id=>replies.push(id),canAct:()=>allowed});await f.start();const r=f.instances[0];r.emit('Jarvis danke',false);assert.equal(replies.length,0);r.emit('Jarvis danke');r.emit('Jarvis danke');assert.deepEqual(replies,['thanks']);f.next();f.next();r.emit('pause');r.emit('Jarvis danke');assert.equal(replies.length,1);r.emit('weiter');allowed=false;r.emit('Jarvis danke');assert.equal(replies.length,1);allowed=true;r.emit('Jarvis danke');assert.equal(replies.length,2);f.controller.stop();
+});
+test('Eigene Zählbefehle können keine Jarvis-Aliasse übernehmen',()=>{
+ const s=defaultVoiceSettings();assert.throws(()=>validateVoiceSettings({...s,commands:{...s.commands,undo:'Jarvis Status'}}),/Jarvis reserviert/);
+});

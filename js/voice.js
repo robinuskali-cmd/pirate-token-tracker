@@ -1,3 +1,4 @@
+import { matchJarvisCommand } from './jarvis-commands.js?v=jarvis-2';
 export const VOICE_STORAGE_KEY = 'pirate-tracker:voice:v1';
 export const VOICE_LOCK = 'pirate-tracker:voice-microphone:v1';
 export const VOICE_ACTIONS = Object.freeze({ add1: '+1 Truhe', add5: '+5 Truhen', add10: '+10 Truhen', undo: 'Rückgängig', pause: 'Pause', resume: 'Weiter' });
@@ -18,6 +19,7 @@ export function validateVoiceSettings(settings) {
   for (const action of Object.keys(VOICE_ACTIONS)) {
     const phrase = settings.commands?.[action]?.trim(), normalized = normalizeVoicePhrase(phrase);
     if (!phrase || phrase.length > 50 || normalized.length < 2) throw new Error('Jeden Befehl mit 2 bis 50 Zeichen ausfüllen.');
+    if (matchJarvisCommand(phrase)) throw new Error('Dieser Befehl ist für Jarvis reserviert. Bitte einen anderen wählen.');
     if (matchMusicCommand(phrase)) throw new Error('Dieser Befehl ist für die Musik reserviert. Bitte einen anderen wählen.');
     if (seen.has(normalized)) throw new Error('Jede Aktion braucht einen anderen Sprachbefehl.');
     seen.add(normalized); commands[action] = phrase;
@@ -55,8 +57,8 @@ const speechErrors = {
   'aborted':'Der Browser hat die Erkennung beendet. Bei Bedarf selbst erneut starten.',
 };
 export class VoiceController {
-  constructor({ Recognition, acquireLease, onCommand, onMediaCommand=()=>{}, onChange=()=>{}, onFeedback=()=>{}, canAct=()=>true, now=()=>Date.now(), setTimer=setTimeout, clearTimer=clearTimeout }) {
-    Object.assign(this, { Recognition, acquireLease, onCommand, onMediaCommand, onChange, onFeedback, canAct, now, setTimer, clearTimer });
+  constructor({ Recognition, acquireLease, onCommand, onMediaCommand=()=>{}, onCoachCommand=()=>{}, onChange=()=>{}, onFeedback=()=>{}, canAct=()=>true, now=()=>Date.now(), setTimer=(...args)=>globalThis.setTimeout(...args), clearTimer=(...args)=>globalThis.clearTimeout(...args) }) {
+    Object.assign(this, { Recognition, acquireLease, onCommand, onMediaCommand, onCoachCommand, onChange, onFeedback, canAct, now, setTimer, clearTimer });
     this.state = { status:'off', active:false, paused:false, testMode:true, heard:'', message:'Mikrofon ist aus.' };
     this.generation = 0; this.serial = Promise.resolve(); this.timer = null; this.release = null; this.recognition = null;
   }
@@ -67,8 +69,8 @@ export class VoiceController {
     if (!this.Recognition) { this.set({status:'error',message:'Dieser Browser bietet keine Spracherkennung an. Bitte in einem unterstützten Browser, z. B. Chrome, öffnen.'}); return; }
     this.commands = validateVoiceSettings({version:1,sound:true,commands}).commands;
     const generation = ++this.generation;
-    this.lastCount = -Infinity; this.ends = [];
-    this.set({status:'starting',active:true,paused:false,testMode,heard:'',message:'Mikrofon wird angefragt …'});
+    this.lastCount = -Infinity; this.lastCoach = -Infinity; this.ends = [];
+    this.set({status:'starting',active:true,paused:false,speaking:false,testMode,heard:'',message:'Mikrofon wird angefragt …'});
     try {
       const release = await this.acquireLease();
       if (generation !== this.generation || !this.active) { release?.(); return; }
@@ -91,6 +93,16 @@ export class VoiceController {
         if (!result?.isFinal || seen.has(i)) continue;
         seen.add(i);
         const transcript = String(result[0]?.transcript || '').slice(0,120);
+        const coach=matchJarvisCommand(transcript);
+        if(coach){
+          this.set({heard:transcript});
+          if(this.state.paused||!this.canAct()){this.set({message:'Jarvis-Befehl übersprungen: Befehle pausiert oder Eingabe gesperrt.'});continue;}
+          if(this.now()-(this.lastCoach??-Infinity)<1500){this.set({message:'Jarvis braucht kurz Luft. Bitte einen Moment warten.'});continue;}
+          this.lastCoach=this.now();
+          try{this.onCoachCommand(coach);if(!this.state.speaking)this.set({message:'Jarvis antwortet. Zähler unverändert.'});}
+          catch(error){this.set({message:`Jarvis konnte nicht antworten: ${error.message}`});}
+          break;
+        }
         const action = matchVoiceCommand(transcript,this.commands), music=matchMusicCommand(transcript);
         this.set({heard:transcript});
         if (music) {
@@ -105,11 +117,11 @@ export class VoiceController {
           this.set({paused:action==='pause',message:action==='pause'?'Befehle pausiert. Mikrofon bleibt für „Weiter“ an.':'Befehle wieder aktiv.'});
           this.feedback(action); continue;
         }
-        if (this.state.paused || !this.canAct()) { this.set({message:'Befehl übersprungen: Zählen ist pausiert oder gerade gesperrt.'}); continue; }
+        if (this.state.paused || this.state.speaking || !this.canAct()) { this.set({message:'Befehl übersprungen: Zählen ist pausiert oder gerade gesperrt.'}); continue; }
         if (this.now()-this.lastCount < 1000) { this.set({message:'Zu schnell wiederholt. Zwischen Zählbefehlen etwa eine Sekunde Pause lassen.'}); continue; }
         this.lastCount = this.now();
         this.serial = this.serial.then(async () => {
-          if (!this.active || generation !== this.generation || this.state.paused || !this.canAct()) return;
+          if (!this.active || generation !== this.generation || this.state.speaking || this.state.paused || this.state.speaking || !this.canAct()) return;
           try {
             if (!this.state.testMode) await this.onCommand(action);
             if (!this.active || generation !== this.generation) return;
@@ -139,7 +151,19 @@ export class VoiceController {
     const recognition=this.recognition; this.recognition=null;
     try { recognition?.abort(); } catch {}
     this.release?.(); this.release=null;
-    this.set({status,active:false,paused:false,heard:'',message});
+    this.set({status,active:false,paused:false,speaking:false,heard:'',message});
+  }
+  suspendForSpeech() {
+    if(!this.active||this.state.speaking)return;
+    if(this.timer!==null)this.clearTimer(this.timer);this.timer=null;
+    const recognition=this.recognition;this.recognition=null;
+    try{recognition?.abort();}catch{}
+    this.set({speaking:true,status:'speaking',message:'Jarvis spricht. Mikrofon-Erkennung pausiert bis zum Ende seiner Antwort.'});
+  }
+  resumeAfterSpeech() {
+    if(!this.active||!this.state.speaking)return;
+    this.set({speaking:false,status:'restarting',message:'Jarvis ist fertig. Erkennung hört wieder zu …'});
+    try{this.open(this.generation);}catch(error){this.stop(error.message,'error');}
   }
   pause() {
     if (this.active) this.set({paused:!this.state.paused,message:this.state.paused?'Befehle wieder aktiv.':'Befehle pausiert. Mikrofon bleibt für „Weiter“ an.'});
