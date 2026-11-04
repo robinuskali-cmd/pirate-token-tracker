@@ -1,3 +1,5 @@
+Aktueller Stand: **92 Tests bestanden**. Jarvis verwendet vorbereitete Audioaufnahmen; frühere SpeechSynthesis-Prüfungen unten dokumentieren die vorherige Implementierung.
+
 # Prüfbericht · Interface 1.1
 
 Stand: 3. November 2026. Das Redesign verändert Darstellung, Navigation und Bedienfeedback. Die bestehende Datenlogik bleibt erhalten.
@@ -151,3 +153,9 @@ Der Cloud-Abnahmetest steht weiterhin in `README.md`.
 ## Jarvis-Stimme aktivieren
 
 91 Tests bestanden. Neue Regressionstests für stumme Freigabe im Benutzerklick, Fortsetzen pausierter Sprachausgabe, hörbare Lautstärke, Halten/Freigeben der Äußerung, tatsächliches Start-Ereignis und Abbruch während des Starts. Browser-QA: neue Sprachtaste öffnet Coach mit aktivem Vorlesen; Begrüßung erreicht Ende-Ereignis; Mikrofon bleibt aus. Die physische Hörbarkeit am Ausgabegerät wird vom Nutzer beurteilt.
+
+## Jarvis – MP3-Aufnahmen statt stummer Browserstimme
+
+Der Nutzer bestätigt: Die Hymne ist hörbar, die Browserstimme nicht. Deshalb verwendet Jarvis jetzt denselben Web-Audio-Kontext wie die Hymne und 288 lokal erzeugte MP3-Abschnitte. Alle WAV-Ausgangsaufnahmen wurden auf nichtleere Audiosignale geprüft (RMS > 80, 16-Bit-PCM). Der Binärcontainer wird auf lückenlose Bytebereiche und vollständige MP3-Header geprüft. Jede Antwortvorlage einschließlich dynamischer Statuswerte, negativer Tageswerte und aller Titel hat passende Aufnahmen.
+
+92 Tests bestanden. Geprüft: Audio-Caches, Zahlenzerlegung, Status, alle Sprüche, Lade-/Decoderfehler, Stopp während Download und Wiedergabe, Ersatz einer Antwort ohne kurzzeitige Freigabe der Erkennung. Browser-QA: echte MP3-Dekodierung und Wiedergabe der Begrüßung, Statusantwort und Stopp. Kein Mikrofon oder echter Zähltest aktiviert. Physische Hörbarkeit muss der Nutzer bestätigen.

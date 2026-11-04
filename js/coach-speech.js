@@ -1,52 +1,59 @@
+import { VOICE_CUES } from './voice-recordings.js?v=recorded-1';
+import { speechPlan } from './voice-plan.js?v=recorded-1';
 export class CoachSpeech {
-  constructor({synthesis,Utterance,onBefore=()=>{},onAfter=()=>{},onChange=()=>{},setTimer=(...args)=>globalThis.setTimeout(...args),clearTimer=(...args)=>globalThis.clearTimeout(...args)}) {
-    Object.assign(this,{synthesis,Utterance,onBefore,onAfter,onChange,setTimer,clearTimer});
-    this.state={status:'idle',message:'Klicke „Jarvis sprechen lassen“, um seine Stimme zu testen.'};this.generation=0;this.timer=null;this.held=false;this.utterance=null;this.primer=null;
+  constructor({getContext,fetchAudio=(...args)=>globalThis.fetch(...args),cues=VOICE_CUES,plan=speechPlan,onBefore=()=>{},onAfter=()=>{},onChange=()=>{}}) {
+    Object.assign(this,{getContext,fetchAudio,cues,plan,onBefore,onAfter,onChange});
+    this.state={status:'idle',message:'Jarvis nutzt Audioaufnahmen. Klicke „Jarvis sprechen lassen“.'};
+    this.generation=0;this.held=false;this.sources=[];this.cache=new Map();this.pack=null;this.loading=null;
   }
-  get supported(){return Boolean(this.synthesis&&this.Utterance);}
+  get supported(){return typeof this.getContext==='function';}
   set(status,message){this.state={status,message};this.onChange();}
-  unlock() {
-    if(!this.supported)return;
-    // Called synchronously from a user's click, before any permission/lock await.
-    // A silent primer enables speech on browsers requiring that first gesture.
-    try {
-      this.synthesis.resume?.();
-      const primer=new this.Utterance('Jarvis');this.primer=primer;
-      primer.lang='de-DE';primer.volume=0;
-      const clear=()=>{if(this.primer===primer)this.primer=null;};
-      primer.onend=clear;primer.onerror=clear;this.synthesis.speak(primer);
-    } catch {this.primer=null;}
+  unlock(){try{this.getContext().resume().catch(()=>{});}catch{}}
+  async load(){
+    if(!this.pack){
+      this.loading ||= this.fetchAudio(new URL('../assets/jarvis-voice.bin',import.meta.url).href,{credentials:'omit',signal:AbortSignal.timeout(30000)}).then(async response=>{
+        if(!response.ok)throw Error('Sprachdatei konnte nicht geladen werden.');this.pack=await response.arrayBuffer();
+      }).finally(()=>{this.loading=null;});
+      await this.loading;
+    }
   }
-  finish(generation,status='idle',message='Jarvis ist fertig.') {
-    if(generation!==this.generation)return;
-    if(this.timer!==null)this.clearTimer(this.timer);this.timer=null;
-    this.utterance=null;
-    if(this.held){this.held=false;this.onAfter();}
-    this.set(status,message);
+  async clip(key,context){
+    if(this.cache.has(key))return this.cache.get(key);
+    const cue=this.cues[key];if(!cue||cue.offset<0||cue.length<=0||cue.offset+cue.length>this.pack.byteLength)throw Error('Sprachaufnahme fehlt oder ist unvollständig.');
+    const buffer=await context.decodeAudioData(this.pack.slice(cue.offset,cue.offset+cue.length));
+    if(this.cache.size>=40)this.cache.delete(this.cache.keys().next().value);
+    this.cache.set(key,buffer);return buffer;
   }
-  say(text) {
-    this.stop(false);
-    if(!this.supported){if(this.held){this.held=false;this.onAfter();}this.set('error','Vorlesen wird hier nicht unterstützt. Die Antwort steht im Chat.');return;}
-    const generation=++this.generation;
-    try {
+  finish(generation,status='idle',message='Jarvis ist fertig.'){
+    if(generation!==this.generation||this.finished===generation)return;
+    this.finished=generation;this.sources=[];if(this.gain){this.gain.disconnect();this.gain=null;}
+    if(this.held){this.held=false;this.onAfter();}this.set(status,message);
+  }
+  async say(text){
+    this.stop(false);const generation=++this.generation;
+    try{
       this.held=true;this.onBefore();
-      const utterance=new this.Utterance(String(text).slice(0,1000));this.utterance=utterance;
-      utterance.lang='de-DE';utterance.rate=1.03;utterance.pitch=.85;utterance.volume=1;
-      const voices=this.synthesis.getVoices?.()||[];
-      utterance.voice=voices.find(v=>v.lang.startsWith('de')&&v.localService)||voices.find(v=>v.lang.startsWith('de'))||null;
-      utterance.onstart=()=>{if(generation===this.generation)this.set('speaking','Jarvis spricht. Die Erkennung hört nach seiner Antwort wieder zu.');};
-      utterance.onend=()=>this.finish(generation);
-      utterance.onerror=event=>this.finish(generation,'error',`Vorlesen unterbrochen (${event.error||'Sprachdienst'}). Die Antwort steht im Chat.`);
-      this.set('starting','Stimme wird gestartet … Falls nichts zu hören ist: Tab-Ton, Ausgabegerät und Lautstärke prüfen.');
-      this.timer=this.setTimer(()=>{if(generation!==this.generation)return;this.synthesis.cancel();this.finish(generation,'error','Vorlesen beendet: Sprachdienst hat nicht rechtzeitig geantwortet.');},30000);
-      this.synthesis.resume?.();this.synthesis.speak(utterance);
-    } catch(error){this.finish(generation,'error',`Vorlesen nicht möglich: ${error.message}`);}
+      const context=this.getContext(),resumed=context.resume();
+      this.set('starting','Sprachaufnahme wird geladen …');await resumed;
+      if(generation!==this.generation)return;
+      if(context.state!=='running')throw Error('Audio blockiert. Bitte „Jarvis sprechen lassen“ anklicken.');
+      const keys=this.plan(String(text));if(!keys.length)throw Error('Keine passende Sprachaufnahme.');
+      await this.load();if(generation!==this.generation)return;
+      const buffers=[];for(const key of keys){buffers.push(await this.clip(key,context));if(generation!==this.generation)return;}
+      const gain=context.createGain();gain.gain.value=1;gain.connect(context.destination);this.gain=gain;
+      let at=context.currentTime+.03;
+      for(const [i,buffer]of buffers.entries()){
+        const source=context.createBufferSource();source.buffer=buffer;source.connect(gain);this.sources.push(source);
+        source.onended=()=>{source.disconnect();if(i===buffers.length-1)this.finish(generation);};
+        source.start(at);at+=buffer.duration+.015;
+      }
+      this.set('speaking','Jarvis spielt eine Audioaufnahme ab. Die Erkennung hört danach wieder zu.');
+    }catch(error){if(generation===this.generation){const sources=this.sources;this.sources=[];for(const source of sources){try{source.stop();}catch{}}this.finish(generation,'error',`Audiofehler: ${error.message} Nutze auch den direkten Audio-Test.`);}}
   }
-  stop(resume=true) {
-    ++this.generation;
-    if(this.timer!==null)this.clearTimer(this.timer);this.timer=null;
-    if(['starting','speaking'].includes(this.state.status)||this.primer)try{this.synthesis?.cancel();}catch{}
-    this.utterance=null;this.primer=null;
+  stop(resume=true){
+    ++this.generation;const sources=this.sources;this.sources=[];
+    for(const source of sources){try{source.stop();}catch{}source.disconnect();}
+    if(this.gain){this.gain.disconnect();this.gain=null;}
     if(resume&&this.held){this.held=false;this.onAfter();}
     if(resume&&this.state.status!=='idle')this.set('idle','Jarvis ist still.');
   }

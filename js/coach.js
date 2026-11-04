@@ -1,7 +1,10 @@
 import { battlepassProgress } from './battlepass.js';
 import { number as n } from './core.js';
-import { JARVIS_COMMANDS, matchJarvisCommand } from './jarvis-commands.js?v=jarvis-2';
+import { JARVIS_COMMANDS, matchJarvisCommand } from './jarvis-commands.js?v=recorded-1';
 
+export const COACH_HELLO='Jarvis an Deck, {name}. Ich bin dein kostenloser lokaler Sprüche-Coach. Schreib zum Beispiel „motivier mich“, „Status“, „Pech“ oder „ich brauche Pause“. Freie KI-Gespräche kann ich nicht führen – freche Kommentare zu deinem Fortschritt schon.';
+export const COACH_UNKNOWN='Dafür habe ich noch keinen passenden Spruch. Ich erkenne Themen wie Motivation, Status, Roast, Pech, Frust und Pause. Probier einen Knopf unten – mein Gehirn ist lokal, mein Größenwahn unbegrenzt.';
+export const COACH_GREETING='Jarvis an Deck, {name}. Meine Stimme ist an. Sag zum Beispiel: Jarvis, motivier mich. Oder beleidige mich. Auf eigene Gefahr, Kapitän.';
 export function coachContext(state, actor, now=new Date()) {
   const player=state?.players?.find(p=>p.id===actor);
   if(!player)return null;
@@ -21,7 +24,7 @@ export function coachIntent(text) {
   if(/\b(hallo|hi|hey|jarvis|moin|hilfe)\b/u.test(t))return 'hello';
   return 'unknown';
 }
-const packs={
+export const COACH_PACKS={
   motivation:[
     'Kapitän {name}, {total} Truhen stehen im Logbuch. Dein Glück wurde offenbar per Fax verschickt. Dein Fortschritt dagegen ist schon da.',
     '{name}, ich habe deinen Lauf analysiert: Du bist noch da. Der RNG wirkt langsam nervös. Rein emotional natürlich.',
@@ -69,12 +72,12 @@ export class LocalCoach {
   constructor(random=Math.random){this.random=random;this.recent=[];}
   reply(intent,context,tone='chaos') {
     if(!context)return 'Melde dich zuerst im Tracker an oder öffne die lokale Demo.';
-    if(intent==='hello')return `Jarvis an Deck, ${context.name}. Ich bin dein kostenloser lokaler Sprüche-Coach. Schreib zum Beispiel „motivier mich“, „Status“, „Pech“ oder „ich brauche Pause“. Freie KI-Gespräche kann ich nicht führen – freche Kommentare zu deinem Fortschritt schon.`;
-    if(intent==='unknown')return 'Dafür habe ich noch keinen passenden Spruch. Ich erkenne Themen wie Motivation, Status, Roast, Pech, Frust und Pause. Probier einen Knopf unten – mein Gehirn ist lokal, mein Größenwahn unbegrenzt.';
+    if(intent==='hello')return COACH_HELLO.replace('{name}',context.name);
+    if(intent==='unknown')return COACH_UNKNOWN;
     const command=JARVIS_COMMANDS.find(c=>c.id===intent);
     const useGentle=tone==='gentle'&&!['break','rng','status','thanks','jackpot'].includes(intent);
-    const category=command&&!useGentle?command.id:tone==='gentle'&&!['break','rng'].includes(intent)?'gentle':Object.hasOwn(packs,intent)?intent:'motivation';
-    const choices=(command&&!useGentle?command.replies:packs[category]).map((text,i)=>({text,id:`${category}:${i}`}));
+    const category=command&&!useGentle?command.id:tone==='gentle'&&!['break','rng'].includes(intent)?'gentle':Object.hasOwn(COACH_PACKS,intent)?intent:'motivation';
+    const choices=(command&&!useGentle?command.replies:COACH_PACKS[category]).map((text,i)=>({text,id:`${category}:${i}`}));
     const unseen=choices.filter(c=>!this.recent.includes(c.id)), pool=unseen.length?unseen:choices;
     const chosen=pool[Math.min(pool.length-1,Math.max(0,Math.floor(this.random()*pool.length)))];
     this.recent=[...this.recent,chosen.id].slice(-3);

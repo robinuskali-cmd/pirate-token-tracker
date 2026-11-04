@@ -1,10 +1,10 @@
 import { TrackerStore } from './store.js';
-import { LocalCoach, coachContext, coachIntent } from './coach.js?v=jarvis-3';
-import { CoachSpeech } from './coach-speech.js?v=jarvis-3';
-import { coachWidget } from './coach-view.js?v=jarvis-3';
-import { createViews } from './views.js?v=jarvis-3';
-import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=jarvis-3';
-import { AnthemPlayer } from './anthem.js?v=jarvis-3';
+import { LocalCoach, coachContext, coachIntent, COACH_GREETING } from './coach.js?v=recorded-1';
+import { CoachSpeech } from './coach-speech.js?v=recorded-1';
+import { coachWidget } from './coach-view.js?v=recorded-1';
+import { createViews } from './views.js?v=recorded-1';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=recorded-1';
+import { AnthemPlayer } from './anthem.js?v=recorded-1';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
@@ -71,7 +71,7 @@ const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:crea
   canAct:()=>Boolean(store.state && store.actor && !dialog.open && (!document.hasFocus() || !document.activeElement?.closest('input,textarea,select,[contenteditable="true"]'))),
   onCommand:async action=>{if(voiceScope!==currentVoiceScope())throw new Error('Spielerzugang gewechselt. Sprachsteuerung erneut starten.');if(action.startsWith('add'))await add(store.actor,Number(action.slice(3)));else if(action==='undo')await undo(store.actor);},
 });
-coachSpeech=new CoachSpeech({synthesis:window.speechSynthesis,Utterance:window.SpeechSynthesisUtterance,onBefore:()=>{anthem.stop();voice.suspendForSpeech();},onAfter:()=>voice.resumeAfterSpeech(),onChange:()=>render()});
+coachSpeech=new CoachSpeech({getContext:getVoiceAudio,onBefore:()=>{anthem.stop();voice.suspendForSpeech();},onAfter:()=>voice.resumeAfterSpeech(),onChange:()=>render()});
 const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage, voicePage } = createViews({
   store, pages, button, avatar, connection, saved, displayTotal, pendingFor, date, time, playerName,
   getPage: () => page, getChartDays: () => chartDays,
@@ -291,7 +291,7 @@ root.addEventListener('submit',async event=>{
 });
 function testCoachSpeech(){
   available();coachState.readAloud=true;coachState.open=true;
-  const text=`Jarvis an Deck, ${nameOf()}. Meine Stimme ist an. Sag zum Beispiel: Jarvis, motivier mich. Oder beleidige mich. Auf eigene Gefahr, Kapitän.`;
+  const text=COACH_GREETING.replace('{name}',nameOf());
   coachState.messages.push({role:'coach',text});coachState.messages=coachState.messages.slice(-6);render();coachSpeech.say(text);
 }
 function coachReply(intent,userText='',fromVoice=false){

@@ -1,6 +1,6 @@
 # Jarvis – alle Sprachbefehle
 
-Zuerst **Jarvis sprechen lassen** anklicken und die Begrüßung anhören. Danach Mikrofon unter „Sprache“ starten und den Befehl einzeln sprechen. Jarvis antwortet auch im Testmodus; seine Befehle ändern keine Truhenzähler. „Antworten vorlesen“ schaltet die Browser-/Systemstimme ein. Während einer Antwort pausiert die Erkennung und hört danach wieder zu. „Jarvis stoppen“ bricht nur die Ausgabe ab; „Mikrofon stoppen“ beendet beides.
+Zuerst **Jarvis sprechen lassen** anklicken und die Begrüßung anhören. Danach Mikrofon unter „Sprache“ starten und den Befehl einzeln sprechen. Jarvis antwortet auch im Testmodus; seine Befehle ändern keine Truhenzähler. „Antworten vorlesen“ schaltet die vorbereiteten Audioaufnahmen ein. Während einer Antwort pausiert die Erkennung und hört danach wieder zu. „Jarvis stoppen“ bricht nur die Ausgabe ab; „Mikrofon stoppen“ beendet beides.
 
 ## Motivation
 
@@ -64,4 +64,4 @@ Zuerst **Jarvis sprechen lassen** anklicken und die Begrüßung anhören. Danach
 
 Die sechs Zähl-/Steuerbefehle sind die Standardbelegung und unter Sprache anpassbar. Im Testmodus ändern sie keine Zähler. Jarvis- und Musikbefehle sind fest. „Jarvis, Pause“ ist ein Pausenspruch; nur „Pause“ pausiert die Befehle. „Jarvis, halt die Fresse“ ist ein Konter-Befehl; der Knopf „Jarvis stoppen“ beendet eine laufende Antwort.
 
-Jarvis ist eine lokale Sprüchesammlung mit wechselnden Antworten und Fortschrittsdaten, keine generative KI. Coach-Nachrichten werden nicht an eine KI-API geschickt. Die Browser-Spracherkennung sowie bestimmte Vorlesestimmen können einen Sprachdienst verwenden. Keine Garantie für Hintergrundbetrieb oder Verfügbarkeit einzelner Stimmen.
+Jarvis ist eine lokale Sprüchesammlung mit wechselnden Antworten und Fortschrittsdaten, keine generative KI. Coach-Nachrichten werden nicht an eine KI-API geschickt. Die Browser-Spracherkennung kann einen Sprachdienst verwenden; Jarvis’ Antworten werden als Audiodateien vom Tracker geladen. Keine Garantie für Hintergrundbetrieb oder Verfügbarkeit einzelner Stimmen.
