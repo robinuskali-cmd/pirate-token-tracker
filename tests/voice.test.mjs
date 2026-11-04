@@ -91,3 +91,13 @@ test('Web-Lock wird bis zur ausdrücklichen Freigabe gehalten',async()=>{
   const release=await acquire();assert.equal(done,false);assert.equal(requested.options.ifAvailable,true);release();await new Promise(resolve=>setImmediate(resolve));assert.equal(done,true);
   await assert.rejects(createVoiceLease(undefined)(),/Sprachsperre/);
 });
+
+test('Musikbefehle laufen auch im Testmodus ohne Zählaktionen; Pause sperrt Start, aber nie Musik-Stopp',async()=>{
+ const music=[];const f=fixture({onMediaCommand:action=>music.push(action)});await f.start();const r=f.instances[0];
+ r.emit('Israel',false);assert.deepEqual(music,[]);r.emit('Israel');r.emit('Netanyahu');assert.deepEqual(music,['anthem-play','anthem-play']);assert.deepEqual(f.calls,[]);
+ r.emit('pause');r.emit('Israel');r.emit('Musik stopp');assert.deepEqual(music,['anthem-play','anthem-play','anthem-stop']);r.emit('weiter');r.emit('Netanjahu');assert.equal(music.at(-1),'anthem-play');
+ f.controller.stop();r.emit('Israel');assert.equal(music.length,4);
+});
+test('Feste Musikbefehle sind vor versehentlicher Belegung als Zählbefehl geschützt',()=>{
+ const s=defaultVoiceSettings();for(const phrase of ['Israel','Netanyahu','Netanjahu','Musik stopp','Hymne stoppen'])assert.throws(()=>validateVoiceSettings({...s,commands:{...s.commands,add1:phrase}}),/reserviert/);
+});

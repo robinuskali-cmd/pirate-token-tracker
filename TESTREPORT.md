@@ -7,8 +7,8 @@ Stand: 3. November 2026. Das Redesign verändert Darstellung, Navigation und Bed
 ```text
 node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs tests/voice.test.mjs
 
-tests   67
-pass    67
+tests   75
+pass    75
 fail     0
 skipped  0
 ```
@@ -139,3 +139,7 @@ Die Passwortverwaltung wurde um acht automatisierte Prüfungen mit einer simulie
 Noch nicht end-to-end geprüft sind Szymons eigener Login, langfristiger Token-Refresh, konkurrierende Änderungen mit zwei verschiedenen Spieleraccounts und zwei physische Geräte. Der Live-Test prüft zwei WebSocket-Verbindungen desselben Max-Accounts im selben Browserprofil. PGlite serialisiert Abfragen einer Instanz. Die Viewport-Prüfung ersetzt keine Prüfung auf mehreren physischen Smartphones und unterschiedlichen Browserengines. Browser-Benachrichtigungen wurden nicht aktiviert und es wurde kein Berechtigungsdialog für den Nutzer bestätigt.
 
 Der Cloud-Abnahmetest steht weiterhin in `README.md`.
+
+## Hymne per Sprachsteuerung
+
+75 automatische Tests bestanden (inklusive PostgreSQL/RLS), davon 8 neue Prüfungen für Medien-Aliasse, Testmodus ohne Zähländerung, Pause/Stopp, reservierte Befehle, Lade- und Audioprobleme, Wiederholschutz, Lautstärke und Stop während eines Downloads. Browser-QA prüft die echte Ogg-Dekodierung und Wiedergabe bei 0 % Lautstärke, den Stopp-Knopf und das responsive Layout. Mikrofonzugriff und echte Spracheingabe wurden nicht automatisch aktiviert. Audioquelle liefert HTTP 200 mit CORS-Freigabe; Quelle/Lizenz in assets/AUDIO-CREDITS.md.

@@ -268,3 +268,9 @@ Ein öffentlicher JavaScript-Client schützt nicht vor einem bereits kompromitti
 - [Supabase Realtime – Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
 - [Supabase JavaScript Passwort-Login](https://supabase.com/docs/reference/javascript/auth-signinwithpassword)
 - [GitHub Pages mit GitHub Actions](https://docs.github.com/en/pages/getting-started-with-github-pages/using-github-actions-workflows-with-github-pages)
+
+## Musik per Sprachbefehl
+
+Unter `#voice` Mikrofon starten und „Israel“ oder „Netanyahu“ (auch „Netanjahu“) einzeln sagen: Hatikvah spielt, auch im Testmodus. „Musik stopp“, „Hymne stoppen“ oder der Stopp-Knopf beendet die Musik. Pause sperrt neue Starts, Musik-Stopp bleibt aktiv. Mikrofon-Stopp, Dialog, Accountwechsel und Verlassen der Seite stoppen die Musik ebenfalls. Wiederholte Starts überlagern oder unterbrechen die laufende Aufnahme nicht.
+
+Der manuelle Knopf „Hymne abspielen“ funktioniert ohne Mikrofon und entsperrt bei Bedarf die Browser-Audiowiedergabe. Standardlautstärke 35 %, veränderbar bis stumm. Einmalige Audiofreischaltung beim Mikrofon-Start; kein automatischer Musik- oder Mikrofonstart beim Laden. Die Aufnahme wird bei Bedarf von Wikimedia geladen; Netzwerkfehler werden angezeigt. Quelle/Lizenz: `assets/AUDIO-CREDITS.md`. Keine Spielanbindung oder Zählmutation durch Musikbefehle.

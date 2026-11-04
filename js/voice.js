@@ -6,12 +6,19 @@ export function normalizeVoicePhrase(value) {
   if (typeof value !== 'string') return '';
   return value.normalize('NFKC').toLocaleLowerCase('de-DE').trim().replace(/^\+\s*/, 'plus ').replace(/\b(eins|ein|fünf|zehn)\b/gu, word => ({ eins:'1', ein:'1', fünf:'5', zehn:'10' }[word])).replace(/[^\p{L}\p{N}]/gu, '');
 }
+export function matchMusicCommand(transcript) {
+  const phrase=normalizeVoicePhrase(transcript);
+  if (['israel','netanyahu','netanjahu'].includes(phrase)) return 'anthem-play';
+  if (['musikstopp','musikstop','hymnestoppen'].includes(phrase)) return 'anthem-stop';
+  return null;
+}
 export function validateVoiceSettings(settings) {
   if (settings?.version !== 1 || typeof settings.sound !== 'boolean') throw new Error('Ungültige Spracheinstellung. Bitte den Standard wiederherstellen.');
   const commands = {}, seen = new Set();
   for (const action of Object.keys(VOICE_ACTIONS)) {
     const phrase = settings.commands?.[action]?.trim(), normalized = normalizeVoicePhrase(phrase);
     if (!phrase || phrase.length > 50 || normalized.length < 2) throw new Error('Jeden Befehl mit 2 bis 50 Zeichen ausfüllen.');
+    if (matchMusicCommand(phrase)) throw new Error('Dieser Befehl ist für die Musik reserviert. Bitte einen anderen wählen.');
     if (seen.has(normalized)) throw new Error('Jede Aktion braucht einen anderen Sprachbefehl.');
     seen.add(normalized); commands[action] = phrase;
   }
@@ -48,8 +55,8 @@ const speechErrors = {
   'aborted':'Der Browser hat die Erkennung beendet. Bei Bedarf selbst erneut starten.',
 };
 export class VoiceController {
-  constructor({ Recognition, acquireLease, onCommand, onChange=()=>{}, onFeedback=()=>{}, canAct=()=>true, now=()=>Date.now(), setTimer=setTimeout, clearTimer=clearTimeout }) {
-    Object.assign(this, { Recognition, acquireLease, onCommand, onChange, onFeedback, canAct, now, setTimer, clearTimer });
+  constructor({ Recognition, acquireLease, onCommand, onMediaCommand=()=>{}, onChange=()=>{}, onFeedback=()=>{}, canAct=()=>true, now=()=>Date.now(), setTimer=setTimeout, clearTimer=clearTimeout }) {
+    Object.assign(this, { Recognition, acquireLease, onCommand, onMediaCommand, onChange, onFeedback, canAct, now, setTimer, clearTimer });
     this.state = { status:'off', active:false, paused:false, testMode:true, heard:'', message:'Mikrofon ist aus.' };
     this.generation = 0; this.serial = Promise.resolve(); this.timer = null; this.release = null; this.recognition = null;
   }
@@ -84,8 +91,15 @@ export class VoiceController {
         if (!result?.isFinal || seen.has(i)) continue;
         seen.add(i);
         const transcript = String(result[0]?.transcript || '').slice(0,120);
-        const action = matchVoiceCommand(transcript,this.commands);
+        const action = matchVoiceCommand(transcript,this.commands), music=matchMusicCommand(transcript);
         this.set({heard:transcript});
+        if (music) {
+          if (music==='anthem-stop' || (!this.state.paused && this.canAct())) {
+            try { this.onMediaCommand(music); this.set({message:music==='anthem-stop'?'Musik gestoppt.':'Musikbefehl erkannt. Zähler unverändert; Wiedergabestatus unten.'}); }
+            catch(error) { this.set({message:`Musikfehler: ${error.message}`}); }
+          } else this.set({message:'Musikstart übersprungen: Befehle sind pausiert oder gesperrt.'});
+          continue;
+        }
         if (!action) { this.set({message:'Kein passender Befehl. Bitte den Befehl einzeln sprechen.'}); continue; }
         if (action === 'pause' || action === 'resume') {
           this.set({paused:action==='pause',message:action==='pause'?'Befehle pausiert. Mikrofon bleibt für „Weiter“ an.':'Befehle wieder aktiv.'});

@@ -1,6 +1,7 @@
 import { TrackerStore } from './store.js';
-import { createViews } from './views.js?v=voice-1';
-import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=voice-1';
+import { createViews } from './views.js?v=anthem-1';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=anthem-1';
+import { AnthemPlayer } from './anthem.js?v=anthem-1';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
@@ -56,7 +57,10 @@ function voiceTone(action) {
   if(!voiceSettings.sound || !voiceAudio || voiceAudio.state!=='running')return;
   try {const oscillator=voiceAudio.createOscillator(),gain=voiceAudio.createGain();oscillator.frequency.value=action==='undo'?440:action==='pause'?300:740;gain.gain.setValueAtTime(.06,voiceAudio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,voiceAudio.currentTime+.08);oscillator.connect(gain);gain.connect(voiceAudio.destination);oscillator.start();oscillator.stop(voiceAudio.currentTime+.08);}catch{}
 }
-const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:createVoiceLease(navigator.locks),onChange:()=>render(),onFeedback:voiceTone,
+function getVoiceAudio(){return voiceAudio ||= new (window.AudioContext||window.webkitAudioContext)();}
+const anthem=new AnthemPlayer({getContext:getVoiceAudio,onChange:()=>render()});
+const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:createVoiceLease(navigator.locks),onChange:state=>{if(!state.active)anthem.stop();render();},onFeedback:voiceTone,
+  onMediaCommand:action=>{if(action==='anthem-stop')anthem.stop();else void anthem.play();},
   canAct:()=>Boolean(store.state && store.actor && !dialog.open && (!document.hasFocus() || !document.activeElement?.closest('input,textarea,select,[contenteditable="true"]'))),
   onCommand:async action=>{if(voiceScope!==currentVoiceScope())throw new Error('Spielerzugang gewechselt. Sprachsteuerung erneut starten.');if(action.startsWith('add'))await add(store.actor,Number(action.slice(3)));else if(action==='undo')await undo(store.actor);},
 });
@@ -67,7 +71,7 @@ const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepas
   getShortcuts: () => shortcuts, getShortcutDraft: () => shortcutDraft, shortcutLabel,
   isShortcutDirty: () => shortcutDirty,
   getEquippedTitle,
-  getVoice:()=>({...voice.state,testMode:voiceMode==='test',commands:voiceSettings.commands,supported:Boolean(SpeechRecognition && navigator.locks?.request),dirty:voiceDirty}),
+  getVoice:()=>({...voice.state,testMode:voiceMode==='test',commands:voiceSettings.commands,supported:Boolean(SpeechRecognition && navigator.locks?.request),dirty:voiceDirty,music:{...anthem.state,volume:anthem.volume}}),
   getVoiceDraft:()=>voiceDraft,
 });
 let lastRenderedPage = null;
@@ -165,6 +169,7 @@ root.addEventListener('keydown', event => {
 });
 window.addEventListener('hashchange',()=>{const target=authCallbackTarget(location.href);if(target){location.replace(target);return;}const next=location.hash.slice(1); if(Object.hasOwn(pages,next)&&page!==next){page=next;render();}});
 function modal(title, body, submitLabel, handler) {
+  anthem.stop();
   if(voice.active)voice.stop('Mikrofon vor dem Tracker-Dialog beendet. Bei Bedarf danach erneut starten.');
   dialog.innerHTML=`<form id="modal-form"><div class="dialog-head"><h2 id="dialog-title">${title}</h2><button type="button" data-close aria-label="Dialog schließen">${icon('close')}</button></div>${body}<div class="dialog-error" role="alert" id="modal-error"></div><div class="dialog-actions"><button type="button" data-close class="quiet">Abbrechen</button><button type="submit" class="primary">${submitLabel}</button></div></form>`;
   dialog.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dialog.close()));
@@ -222,7 +227,9 @@ async function undo(player) {
   await store.mutate('undo',{player_id:player,change_id:change.id,expected_revision:change.round_id?roundCount(s,change.round_id,player).revision:0});
 }
 const actions={
-  'voice-start':async()=>{available();voiceScope=currentVoiceScope();if(voiceSettings.sound){try{voiceAudio ||= new (window.AudioContext||window.webkitAudioContext)();voiceAudio.resume().catch(()=>{});}catch{}}await voice.start({commands:voiceSettings.commands,testMode:voiceMode==='test'});},
+  'anthem-play':()=>{available();voiceScope=currentVoiceScope();return anthem.play();},
+  'anthem-stop':()=>anthem.stop(),
+  'voice-start':async()=>{available();voiceScope=currentVoiceScope();try{anthem.unlock().catch(()=>{});}catch{}await voice.start({commands:voiceSettings.commands,testMode:voiceMode==='test'});},
   'voice-stop':()=>voice.stop(),
   'voice-pause':()=>voice.pause(),
   'voice-defaults':()=>saveVoice(defaultVoiceSettings()),
@@ -265,6 +272,7 @@ function saveVoice(settings){voiceSettings=writeVoiceSettings(localStorage,setti
 function dirtyVoice(){voiceDirty=true;const status=root.querySelector('#voice-save-status');if(status)status.textContent='Noch nicht gespeichert.';const error=root.querySelector('#voice-save-error');if(error)error.textContent='';}
 root.addEventListener('change',event=>{if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}if(event.target.id==='voice-mode'){voiceMode=event.target.value==='live'?'live':'test';voice.stop('Modus geändert. Mikrofon selbst erneut starten.');}if(event.target.id==='voice-sound'){voiceDraft.sound=event.target.checked;dirtyVoice();}});
 root.addEventListener('input',event=>{
+  if(event.target.id==='anthem-volume'){anthem.setVolume(Number(event.target.value)/100);const label=root.querySelector('#anthem-volume-value');if(label)label.textContent=event.target.value+' %';}
   if(event.target.dataset.voiceCommand){voiceDraft.commands[event.target.dataset.voiceCommand]=event.target.value;dirtyVoice();}
   if(event.target.id==='rng-range')document.querySelector('#rng-percent').value=event.target.value;
   if(event.target.id==='rng-percent'&&event.target.value!==''&&Number.isFinite(Number(event.target.value)))document.querySelector('#rng-range').value=Math.min(1,Math.max(.001,Number(event.target.value)));
@@ -286,7 +294,7 @@ setInterval(()=>{
     if(play)play.textContent=duration(s.rounds.reduce((a,r)=>a+(r.manual&&!s.counts.some(c=>c.round_id===r.id&&c.duration_seconds)?0:roundSeconds(s,r)),0)).slice(0,5);
   }
 },1000);
-window.addEventListener('pagehide',()=>{if(voice.active)voice.stop();voiceAudio?.close().catch(()=>{});voiceAudio=null;});
-document.addEventListener('freeze',()=>{if(voice.active)voice.stop('Browser hat den Tab angehalten. Bitte selbst erneut starten.');});
-store.addEventListener('change',()=>{if(voice.active && voiceScope!==currentVoiceScope())voice.stop('Spielerzugang gewechselt. Mikrofon wurde beendet.');render();});
+window.addEventListener('pagehide',()=>{anthem.stop();if(voice.active)voice.stop();voiceAudio?.close().catch(()=>{});voiceAudio=null;});
+document.addEventListener('freeze',()=>{anthem.stop();if(voice.active)voice.stop('Browser hat den Tab angehalten. Bitte selbst erneut starten.');});
+store.addEventListener('change',()=>{if(voiceScope!==currentVoiceScope()){anthem.stop();if(voice.active)voice.stop('Spielerzugang gewechselt. Mikrofon wurde beendet.');}render();});
 if (!authRedirect) { try{await store.init();}catch(error){store.status='error';store.fail(error);} }
