@@ -5,10 +5,10 @@ Stand: 3. November 2026. Das Redesign verändert Darstellung, Navigation und Bed
 ## Automatisierte Funktionstests
 
 ```text
-node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs
+node --test tests/core.test.mjs tests/store.test.mjs tests/database.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs tests/voice.test.mjs
 
-tests   49
-pass    49
+tests   67
+pass    67
 fail     0
 skipped  0
 ```
@@ -123,6 +123,14 @@ Portabler C#-/WinForms-Helfer mit dem vorhandenen Windows/.NET-Compiler gebaut. 
 **16 zusätzliche Windows-Selbsttests bestanden.** Sie verwenden die tatsächlichen Helfer-Klassen mit simulierten HTTP-Antworten und prüfen Account-Zuordnung, +1-/Runden-/Undo-Regeln, dauerhaften Puffer, Schreibfehler, Konfliktarchivierung, Hotkey-Validierung, reale Windows-Registrierung mit Freigabe und eine selbst gepostete WM_HOTKEY-Nachricht. Ferner geprüft: verlorene Antwort nach simuliertem Commit ohne Doppelzählung, fehlgeschlagener Snapshot nach erfolgreicher Mutation ohne falsche Konfliktmarkierung, persistenter Server-Konflikt, Token-Refresh mit unveränderter Anfragekennung, Abbruch bei Benutzerwechsel und Abmeldung nur der eigenen Helfersitzung.
 
 Das Anmeldefenster wurde durch den eigenen Renderer ohne Anmeldung erstellt und visuell geprüft. Dies ist eine gerenderte Anwendungsansicht, kein Screenshot einer echten Anmeldung. Der Agent hat keine Benutzerpasswörter eingegeben, keine echten Helfer-Anmeldungen durchgeführt und keine Cloud-Zähler verändert. Tatsächliche Hardware-Tastendrücke bei minimierter Anwendung und Tastenerkennung im laufenden Fortnite sind noch nicht geprüft; dafür ist die Nutzer-Anmeldung und ein anschließender Ingame-Test nötig. Die bereits dokumentierten 49 Website-/Datenbanktests bleiben davon getrennt.
+
+## Browser-Sprachsteuerung · 4. November 2026
+
+18 zusätzliche Tests mit einem simulierten SpeechRecognition-Dienst bestehen. Geprüft: gewünschte Befehle plus eins/fünf/zehn einschließlich Zahlen-/Pluszeichenvarianten, Undo/Pause/Weiter, keine Teiltreffer, normalisierte Befehlskonflikte, Präferenzspeicher und sichtbare Speicherfehler, kein automatischer Mikrofonstart, deutscher kontinuierlicher Modus, Testmodus ohne Mutationen, sequenzielle echte Aktionsübergabe, finale Ergebnis-Indizes und Duplikate, Wiederholschutz, Pause bei weiterhin offenem Mikrofon, Stop mit Freigabe/ignorierten späten Ereignissen, belegte Tab-Sperre, Stop während der Sperranfrage, Mikrofon-/Dienstfehler ohne erneute Anfrage, natürliche Neustarts und Begrenzung schneller Abbrüche, Dialog-/Eingabesperre, Mutationsfehler sowie Verhalten erkannter Befehle bei natürlichem Ende gegenüber manuellem Stop.
+
+Die neue Seite ist über Live und Einstellungen erreichbar; die sechs Hauptnavigationspunkte bleiben erhalten. Standardmäßig ist das Mikrofon aus und der Testmodus aktiv. Nur eine ausdrücklich gestartete Erkennung greift auf die Browser-API zu. Einstellungen werden lokal gespeichert, erkannte Texte nur flüchtig angezeigt und beim Stop gelöscht. Audio und Transkripte werden nicht im Tracker gespeichert. Vor dem Start wird auf eine mögliche Audioübertragung an den Browser-Spracherkennungsdienst hingewiesen.
+
+Kein echtes Mikrofon wurde vom Agenten gestartet, keine Mikrofonberechtigung erteilt und keine echte Audiodatei verarbeitet. Tatsächliche Aussprache-Erkennung, Service-Verfügbarkeit und Hintergrundbetrieb mit Fortnite sind deshalb noch nicht end-to-end geprüft. Simulierte Tests belegen die Ereignis-/Zähllogik, keine Anti-Cheat-Verträglichkeit und keine Zuverlässigkeit in jedem Browser.
 
 ## Grenzen
 

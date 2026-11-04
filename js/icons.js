@@ -1,4 +1,5 @@
 const paths = {
+  mic:'<rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/>',
   anchor:'<circle cx="12" cy="5" r="2"/><path d="M12 7v14M8 10h8M3 14c0 9 18 9 18 0M3 14l-2 3m20-3 2 3"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   book:'<path d="M5 3h14v18H5a2 2 0 0 1 0-4h14M5 3a2 2 0 0 0-2 2v14M8 7h7M8 11h5"/>',

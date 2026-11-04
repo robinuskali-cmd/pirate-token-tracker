@@ -142,7 +142,28 @@ Der Fortschritt wird aus den gespeicherten Supabase-Zählwerten berechnet und is
 
 **Ausrüsten** zeigt einen freigeschalteten Titel auf der eigenen Zählkarte an. Diese kosmetische Auswahl wird nur in diesem Browser gespeichert, getrennt nach Account und Demo/Live; andere Tabs desselben Accounts übernehmen sie. Über **Basistitel verwenden** lässt sie sich zurücksetzen. Wird der gewählte Titel durch eine Zählkorrektur gesperrt, wird der Basistitel angezeigt. Es gibt keine zusätzlichen Datenbanktabellen oder Schreibrechte für den Battlepass.
 
-### Im Spiel zählen, ohne zum Browser zu wechseln
+### Sprachsteuerung im Browser
+
+**Live → Modus & Befehle** oder **Einstellungen → Sprachsteuerung** öffnet [die Spracheingabe](https://schafermax809-arch.github.io/pirate-token-tracker/#voice). Der Windows-Hotkey-Helfer ist dafür nicht nötig und kann beendet bleiben.
+
+| Gesprochener Befehl | Aktion |
+| --- | --- |
+| plus eins / plus 1 | +1 Truhe |
+| plus fünf / plus 5 | +5 Truhen |
+| plus zehn / plus 10 | +10 Truhen |
+| rückgängig | Letzten eigenen geeigneten Live-Klick zurücknehmen |
+| pause | Zählbefehle pausieren; Mikrofon hört weiterhin auf „weiter“ |
+| weiter | Zählbefehle fortsetzen |
+
+Die Befehle sind anpassbar. Erst **Mikrofon starten** anklicken und selbst die Mikrofonfreigabe erteilen. Der voreingestellte **Testmodus** verändert keine Zählwerte. Nach erfolgreichem Test **Echt zählen** wählen und das Mikrofon erneut starten. Jeder Seitenstart beginnt wieder ausgeschaltet im Testmodus. Einstellungen und Signaltöne gelten für diesen Browser; Mikrofonzustand und erkannte Sprache werden nicht gespeichert oder an Supabase gesendet.
+
+Die Funktion verwendet die [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition). Sie ist nicht in allen Browsern verfügbar; z. B. Chrome kann Audiodaten an einen externen Spracherkennungsdienst senden. Das steht vor dem Start im Interface. Es gibt keine Zusage lokaler/offline Verarbeitung. Der Agent aktiviert kein Mikrofon automatisch und bestätigt keine Mikrofonberechtigung für den Nutzer.
+
+Browser geöffnet lassen. Hintergrundbetrieb und Unterbrechungen hängen von Browser/OS ab und müssen auf dem eigenen Gerät geprüft werden. Kurze natürliche Dienstunterbrechungen werden bei weiterhin gewollter Aufnahme erneut verbunden; Berechtigungs-, Netzwerk- und Gerätefehler stoppen bis zum nächsten eigenen Start. Wiederholte schnelle Abbrüche werden begrenzt. Dies ist keine Anti-Cheat-Freigabe und kein Ersatz für einen tatsächlichen Ingame-Test.
+
+Nur vollständige passende Befehle zählen; mehrere Befehle in einem Satz werden nicht als Teiltreffer interpretiert. Finale Erkennungsindizes zählen nur einmal, zusätzlich gilt eine Sekunde Wiederholschutz. Sprachbefehle werden nacheinander über die vorhandenen Add-/Undo-Funktionen verarbeitet. Headset verwenden; andere Stimmen oder Spielton können sonst Befehle auslösen. Die browserweite Web-Lock-Sperre erlaubt nur einem Tracker-Tab das Zuhören. Bei Accountwechsel, Reload, angehaltenem Tab und beim Öffnen eines Tracker-Dialogs wird die Aufnahme beendet. **Mikrofon stoppen** bricht die Erkennung einschließlich noch nicht abgearbeiteter Befehle ab. Bereits vorgemerkte Zählungen bleiben erhalten.
+
+### Windows-Helfer für globale Hotkeys
 
 Über **Einstellungen → Tastaturbelegung → Ingame-Hotkeys** öffnet ihr die [Download- und Einrichtungsseite](https://schafermax809-arch.github.io/pirate-token-tracker/ingame.html). Der optionale portable Windows-Helfer meldet sich mit dem vorhandenen Tracker-Account direkt bei Supabase an. Standard: **F8 +1**, **F9 Rückgängig**, **F10 Pause/Fortsetzen**. Nach **Hotkeys aktivieren** das Fenster minimieren und spielen; der Browser kann geschlossen bleiben. Eigene Tastenbelegungen sind im Helfer möglich und unabhängig von den Browser-Kürzeln.
 
@@ -195,7 +216,7 @@ Browserspeicher nicht löschen und Privatmodus nicht schließen, solange Anfrage
 Ohne zusätzliche Bibliotheken, mit Node.js 22+:
 
 ```sh
-node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs
+node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs tests/voice.test.mjs
 ```
 
 SQL zusätzlich mit einer lokalen PostgreSQL-WASM-Engine (PGlite) testen:

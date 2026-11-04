@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test counter and durable queue
-        run: node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs
+        run: node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs tests/voice.test.mjs
       - name: Prepare static files
         run: |
           mkdir _site

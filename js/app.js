@@ -1,5 +1,6 @@
 import { TrackerStore } from './store.js';
-import { createViews } from './views.js?v=ingame-1';
+import { createViews } from './views.js?v=voice-1';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=voice-1';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
@@ -11,7 +12,7 @@ const authRedirect = authCallbackTarget(location.href);
 if (authRedirect) location.replace(authRedirect);
 const store = new TrackerStore();
 let shortcuts = readShortcuts(localStorage), shortcutDraft = structuredClone(shortcuts), shortcutDirty = false;
-const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'], battlepass: ['Battlepass','trophy'] };
+const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'], battlepass: ['Battlepass','trophy'], voice: ['Sprache','mic',true] };
 let page = Object.hasOwn(pages, location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 let chartDays = 7, rngPercent = .1, rngChests = 1600, previousTotal = null, toastTimer;
 const playerName = id => id === 'max' ? 'Max' : 'Szymon';
@@ -48,13 +49,26 @@ function renderRng() {
 }
 const equippedTitleKey = () => titleStorageKey(store.demo ? 'demo' : store.scope, store.actor);
 const getEquippedTitle = () => equippedReward(localStorage, equippedTitleKey(), store.state?.players.find(p=>p.id===store.actor));
-const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage } = createViews({
+let voiceSettings=readVoiceSettings(localStorage), voiceDraft=structuredClone(voiceSettings), voiceDirty=false, voiceMode='test', voiceScope='', voiceAudio=null;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const currentVoiceScope = () => `${store.demo?'demo':store.scope}:${store.actor}`;
+function voiceTone(action) {
+  if(!voiceSettings.sound || !voiceAudio || voiceAudio.state!=='running')return;
+  try {const oscillator=voiceAudio.createOscillator(),gain=voiceAudio.createGain();oscillator.frequency.value=action==='undo'?440:action==='pause'?300:740;gain.gain.setValueAtTime(.06,voiceAudio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,voiceAudio.currentTime+.08);oscillator.connect(gain);gain.connect(voiceAudio.destination);oscillator.start();oscillator.stop(voiceAudio.currentTime+.08);}catch{}
+}
+const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:createVoiceLease(navigator.locks),onChange:()=>render(),onFeedback:voiceTone,
+  canAct:()=>Boolean(store.state && store.actor && !dialog.open && (!document.hasFocus() || !document.activeElement?.closest('input,textarea,select,[contenteditable="true"]'))),
+  onCommand:async action=>{if(voiceScope!==currentVoiceScope())throw new Error('Spielerzugang gewechselt. Sprachsteuerung erneut starten.');if(action.startsWith('add'))await add(store.actor,Number(action.slice(3)));else if(action==='undo')await undo(store.actor);},
+});
+const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage, voicePage } = createViews({
   store, pages, button, avatar, connection, saved, displayTotal, pendingFor, date, time, playerName,
   getPage: () => page, getChartDays: () => chartDays,
   getRng: () => ({ percent: rngPercent, chests: rngChests }),
   getShortcuts: () => shortcuts, getShortcutDraft: () => shortcutDraft, shortcutLabel,
   isShortcutDirty: () => shortcutDirty,
   getEquippedTitle,
+  getVoice:()=>({...voice.state,testMode:voiceMode==='test',commands:voiceSettings.commands,supported:Boolean(SpeechRecognition && navigator.locks?.request),dirty:voiceDirty}),
+  getVoiceDraft:()=>voiceDraft,
 });
 let lastRenderedPage = null;
 const counterHistory = new Map();
@@ -100,7 +114,7 @@ function render() {
   const focusAttributes = focused?.tagName === 'BUTTON' ? ['action','player','delta','page','round','request','level'].filter(key=>focused.dataset[key]).map(key=>`[data-${key}="${CSS.escape(focused.dataset[key])}"]`).join('') : '';
   if (!store.state && !['signedout','error'].includes(store.status)) { root.innerHTML=shell('<div class="empty"><span class="loader" style="display:inline-block"></span><p class="mt">Das Logbuch wird geladen …</p></div>'); return; }
   if (!store.state) root.innerHTML=shell(loginPage());
-  else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage})[page]());
+  else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage,voice:voicePage})[page]());
   if (page==='rng' && store.state) renderRng();
   updateTableLabels();
   if (lastRenderedPage !== page) root.querySelector('.view')?.classList.add('view-enter');
@@ -132,6 +146,7 @@ function keyboardDirty() {
   const error = root.querySelector('#shortcut-error'); if (error) error.textContent = '';
 }
 window.addEventListener('storage', event => {
+  if(event.key===VOICE_STORAGE_KEY){voiceSettings=readVoiceSettings(localStorage);if(!voiceDirty)voiceDraft=structuredClone(voiceSettings);if(voice.active)voice.stop('Sprachbefehle wurden in einem anderen Tab geändert. Bitte selbst erneut starten.');else render();return;}
   if (event.key === equippedTitleKey()) { render(); return; }
   if (event.key !== SHORTCUT_STORAGE_KEY) return;
   shortcuts = readShortcuts(localStorage);
@@ -150,6 +165,7 @@ root.addEventListener('keydown', event => {
 });
 window.addEventListener('hashchange',()=>{const target=authCallbackTarget(location.href);if(target){location.replace(target);return;}const next=location.hash.slice(1); if(Object.hasOwn(pages,next)&&page!==next){page=next;render();}});
 function modal(title, body, submitLabel, handler) {
+  if(voice.active)voice.stop('Mikrofon vor dem Tracker-Dialog beendet. Bei Bedarf danach erneut starten.');
   dialog.innerHTML=`<form id="modal-form"><div class="dialog-head"><h2 id="dialog-title">${title}</h2><button type="button" data-close aria-label="Dialog schließen">${icon('close')}</button></div>${body}<div class="dialog-error" role="alert" id="modal-error"></div><div class="dialog-actions"><button type="button" data-close class="quiet">Abbrechen</button><button type="submit" class="primary">${submitLabel}</button></div></form>`;
   dialog.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>dialog.close()));
   dialog.querySelector('form').addEventListener('submit',async event=>{
@@ -206,6 +222,10 @@ async function undo(player) {
   await store.mutate('undo',{player_id:player,change_id:change.id,expected_revision:change.round_id?roundCount(s,change.round_id,player).revision:0});
 }
 const actions={
+  'voice-start':async()=>{available();voiceScope=currentVoiceScope();if(voiceSettings.sound){try{voiceAudio ||= new (window.AudioContext||window.webkitAudioContext)();voiceAudio.resume().catch(()=>{});}catch{}}await voice.start({commands:voiceSettings.commands,testMode:voiceMode==='test'});},
+  'voice-stop':()=>voice.stop(),
+  'voice-pause':()=>voice.pause(),
+  'voice-defaults':()=>saveVoice(defaultVoiceSettings()),
   'equip-title':b=>{available();const reward=equipReward(localStorage,equippedTitleKey(),store.state.players.find(p=>p.id===store.actor),Number(b.dataset.level));render();toast(`Titel ausgerüstet: ${reward.title}`);},
   'shortcuts-reset':()=>saveKeyboard(defaultShortcuts()),
   'increment':b=>add(b.dataset.player,Number(b.dataset.delta)),
@@ -232,6 +252,7 @@ root.addEventListener('click',async event=>{
   try{await actions[b.dataset.action](b);}catch(error){toast(error.message,'error');}
 });
 root.addEventListener('submit',async event=>{
+  if(event.target.id==='voice-form'){event.preventDefault();try{saveVoice(voiceDraft);}catch(error){root.querySelector('#voice-save-error').textContent=error.message;}return;}
   if(event.target.id==='shortcuts-form'){
     event.preventDefault();
     try{saveKeyboard(shortcutDraft);}catch(error){root.querySelector('#shortcut-error').textContent=error.message;}
@@ -240,8 +261,11 @@ root.addEventListener('submit',async event=>{
   if(event.target.id!=='login-form')return;event.preventDefault();const form=new FormData(event.target),b=event.submitter;b.disabled=true;b.classList.add('is-loading');b.setAttribute('aria-busy','true');
   try{await store.login(form.get('email'),form.get('password'));}catch(error){const node=document.querySelector('#login-error');if(node)node.textContent=error.message;else toast(error.message,'error');}finally{b.disabled=false;b.classList.remove('is-loading');b.removeAttribute('aria-busy');}
 });
-root.addEventListener('change',event=>{if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}});
+function saveVoice(settings){voiceSettings=writeVoiceSettings(localStorage,settings);voiceDraft=structuredClone(voiceSettings);voiceDirty=false;voice.stop('Sprachbefehle gespeichert. Mikrofon bei Bedarf selbst starten.');}
+function dirtyVoice(){voiceDirty=true;const status=root.querySelector('#voice-save-status');if(status)status.textContent='Noch nicht gespeichert.';const error=root.querySelector('#voice-save-error');if(error)error.textContent='';}
+root.addEventListener('change',event=>{if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}if(event.target.id==='voice-mode'){voiceMode=event.target.value==='live'?'live':'test';voice.stop('Modus geändert. Mikrofon selbst erneut starten.');}if(event.target.id==='voice-sound'){voiceDraft.sound=event.target.checked;dirtyVoice();}});
 root.addEventListener('input',event=>{
+  if(event.target.dataset.voiceCommand){voiceDraft.commands[event.target.dataset.voiceCommand]=event.target.value;dirtyVoice();}
   if(event.target.id==='rng-range')document.querySelector('#rng-percent').value=event.target.value;
   if(event.target.id==='rng-percent'&&event.target.value!==''&&Number.isFinite(Number(event.target.value)))document.querySelector('#rng-range').value=Math.min(1,Math.max(.001,Number(event.target.value)));
   if(['rng-percent','rng-chests','rng-range'].includes(event.target.id))renderRng();
@@ -262,5 +286,7 @@ setInterval(()=>{
     if(play)play.textContent=duration(s.rounds.reduce((a,r)=>a+(r.manual&&!s.counts.some(c=>c.round_id===r.id&&c.duration_seconds)?0:roundSeconds(s,r)),0)).slice(0,5);
   }
 },1000);
-store.addEventListener('change',render);
+window.addEventListener('pagehide',()=>{if(voice.active)voice.stop();voiceAudio?.close().catch(()=>{});voiceAudio=null;});
+document.addEventListener('freeze',()=>{if(voice.active)voice.stop('Browser hat den Tab angehalten. Bitte selbst erneut starten.');});
+store.addEventListener('change',()=>{if(voice.active && voiceScope!==currentVoiceScope())voice.stop('Spielerzugang gewechselt. Mikrofon wurde beendet.');render();});
 if (!authRedirect) { try{await store.init();}catch(error){store.status='error';store.fail(error);} }

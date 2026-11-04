@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs",
+    "test": "node --test tests/core.test.mjs tests/store.test.mjs tests/account.test.mjs tests/shortcuts.test.mjs tests/battlepass.test.mjs tests/voice.test.mjs",
     "test:db": "node --test tests/database.test.mjs"
   },
   "devDependencies": {
