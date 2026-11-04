@@ -1,6 +1,6 @@
 # Jarvis – alle Sprachbefehle
 
-Mikrofon unter „Sprache“ starten und den Befehl einzeln sprechen. Jarvis antwortet auch im Testmodus; seine Befehle ändern keine Truhenzähler. „Antworten vorlesen“ schaltet die Browser-/Systemstimme ein. Während einer Antwort pausiert die Erkennung und hört danach wieder zu. „Jarvis stoppen“ bricht nur die Ausgabe ab; „Mikrofon stoppen“ beendet beides.
+Zuerst **Jarvis sprechen lassen** anklicken und die Begrüßung anhören. Danach Mikrofon unter „Sprache“ starten und den Befehl einzeln sprechen. Jarvis antwortet auch im Testmodus; seine Befehle ändern keine Truhenzähler. „Antworten vorlesen“ schaltet die Browser-/Systemstimme ein. Während einer Antwort pausiert die Erkennung und hört danach wieder zu. „Jarvis stoppen“ bricht nur die Ausgabe ab; „Mikrofon stoppen“ beendet beides.
 
 ## Motivation
 

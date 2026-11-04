@@ -1,10 +1,10 @@
 import { TrackerStore } from './store.js';
-import { LocalCoach, coachContext, coachIntent } from './coach.js?v=jarvis-2';
-import { CoachSpeech } from './coach-speech.js?v=jarvis-2';
-import { coachWidget } from './coach-view.js?v=jarvis-2';
-import { createViews } from './views.js?v=jarvis-2';
-import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=jarvis-2';
-import { AnthemPlayer } from './anthem.js?v=jarvis-2';
+import { LocalCoach, coachContext, coachIntent } from './coach.js?v=jarvis-3';
+import { CoachSpeech } from './coach-speech.js?v=jarvis-3';
+import { coachWidget } from './coach-view.js?v=jarvis-3';
+import { createViews } from './views.js?v=jarvis-3';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=jarvis-3';
+import { AnthemPlayer } from './anthem.js?v=jarvis-3';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
@@ -131,7 +131,7 @@ function render() {
   if (!store.state && !['signedout','error'].includes(store.status)) { root.innerHTML=shell('<div class="empty"><span class="loader" style="display:inline-block"></span><p class="mt">Das Logbuch wird geladen …</p></div>'); return; }
   if (!store.state) root.innerHTML=shell(loginPage());
   else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage,voice:voicePage})[page]());
-  if(store.state)root.insertAdjacentHTML('beforeend',coachWidget(coachState,coachContext(store.state,store.actor)));
+  if(store.state)root.insertAdjacentHTML('beforeend',coachWidget({...coachState,speech:coachSpeech.state},coachContext(store.state,store.actor)));
   if(chatScroll!==undefined){const chat=root.querySelector('.jarvis-chat');if(chat)chat.scrollTop=chatScroll;}
   if (page==='rng' && store.state) renderRng();
   updateTableLabels();
@@ -241,14 +241,15 @@ async function undo(player) {
   await store.mutate('undo',{player_id:player,change_id:change.id,expected_revision:change.round_id?roundCount(s,change.round_id,player).revision:0});
 }
 const actions={
-  'coach-toggle':()=>{coachState.open=!coachState.open;if(coachState.open&&!coachState.messages.length){const readAloud=coachState.readAloud;coachState.readAloud=false;coachReply('hello');coachState.readAloud=readAloud;render();}else render();},
+  'coach-toggle':()=>{coachState.open=!coachState.open;if(coachState.open&&coachState.readAloud)testCoachSpeech();else if(coachState.open&&!coachState.messages.length)coachReply('hello');else render();},
   'coach-close':()=>{coachState.open=false;render();root.querySelector('[data-action="coach-toggle"]')?.focus({preventScroll:true});},
+  'coach-test':()=>testCoachSpeech(),
   'coach-prompt':b=>coachReply(b.dataset.intent),
   'coach-silence':()=>coachSpeech.stop(),
   'coach-repeat':()=>{const text=coachState.messages.findLast(m=>m.role==='coach')?.text;if(text)coachSpeech.say(text);},
   'anthem-play':()=>{available();voiceScope=currentVoiceScope();return anthem.play();},
   'anthem-stop':()=>anthem.stop(),
-  'voice-start':async()=>{available();coachSpeech.stop();voiceScope=currentVoiceScope();try{anthem.unlock().catch(()=>{});}catch{}await voice.start({commands:voiceSettings.commands,testMode:voiceMode==='test'});},
+  'voice-start':async()=>{available();coachSpeech.stop();if(coachState.readAloud)coachSpeech.unlock();voiceScope=currentVoiceScope();try{anthem.unlock().catch(()=>{});}catch{}await voice.start({commands:voiceSettings.commands,testMode:voiceMode==='test'});},
   'voice-stop':()=>{voice.stop();coachSpeech.stop();},
   'voice-pause':()=>voice.pause(),
   'voice-defaults':()=>saveVoice(defaultVoiceSettings()),
@@ -288,6 +289,11 @@ root.addEventListener('submit',async event=>{
   if(event.target.id!=='login-form')return;event.preventDefault();const form=new FormData(event.target),b=event.submitter;b.disabled=true;b.classList.add('is-loading');b.setAttribute('aria-busy','true');
   try{await store.login(form.get('email'),form.get('password'));}catch(error){const node=document.querySelector('#login-error');if(node)node.textContent=error.message;else toast(error.message,'error');}finally{b.disabled=false;b.classList.remove('is-loading');b.removeAttribute('aria-busy');}
 });
+function testCoachSpeech(){
+  available();coachState.readAloud=true;coachState.open=true;
+  const text=`Jarvis an Deck, ${nameOf()}. Meine Stimme ist an. Sag zum Beispiel: Jarvis, motivier mich. Oder beleidige mich. Auf eigene Gefahr, Kapitän.`;
+  coachState.messages.push({role:'coach',text});coachState.messages=coachState.messages.slice(-6);render();coachSpeech.say(text);
+}
 function coachReply(intent,userText='',fromVoice=false){
   const context=coachContext(store.state,store.actor);if(!context)return;
   if(userText)coachState.messages.push({role:'user',text:userText});

@@ -147,3 +147,7 @@ Der Cloud-Abnahmetest steht weiterhin in `README.md`.
 ## Jarvis
 
 89 Tests bestanden, einschließlich Datenbank/RLS. Geprüft: 39 eindeutige Befehlsformulierungen mit 94 Varianten; mehrere Zufallsantworten pro Befehl; Texte/Eingaben escaped; keine Zähländerung durch Jarvis in Test- und Echtmodus; Berliner Tageswerte und Stufen; Pause/Eingabeschutz; Vorlese-Abbruch, alte Ereignisse, Fehler, Zeitlimit und Wiederaufnahme nur einer zuvor aktiven Erkennung. Browser-QA in lokaler Demo: unterschiedliche Beleidigungs-Konter per Text, echter SpeechSynthesis-Start/Ende, Stopp, Befehlsliste, 323-Pixel-Layout. Kein echter Mikrofonzugriff oder Cloud-Zähltest.
+
+## Jarvis-Stimme aktivieren
+
+91 Tests bestanden. Neue Regressionstests für stumme Freigabe im Benutzerklick, Fortsetzen pausierter Sprachausgabe, hörbare Lautstärke, Halten/Freigeben der Äußerung, tatsächliches Start-Ereignis und Abbruch während des Starts. Browser-QA: neue Sprachtaste öffnet Coach mit aktivem Vorlesen; Begrüßung erreicht Ende-Ereignis; Mikrofon bleibt aus. Die physische Hörbarkeit am Ausgabegerät wird vom Nutzer beurteilt.

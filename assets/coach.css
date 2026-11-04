@@ -5,3 +5,5 @@
 @media(prefers-reduced-motion:no-preference){.jarvis-panel{animation:jarvis-in .16s ease-out}@keyframes jarvis-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 
 .jarvis-audio{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 0 12px}.jarvis-audio label{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted)}.jarvis-audio input{width:16px;min-height:16px;accent-color:var(--signal)}.jarvis-guide{margin:20px 0}.jarvis-guide>p{font-size:12px;line-height:1.7}.jarvis-guide summary{cursor:pointer;color:var(--brass);padding:12px 0}.jarvis-command-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.jarvis-command-list>div{padding:10px;border:1px solid var(--line);min-width:0;overflow-wrap:anywhere}.jarvis-command-list strong{font-size:12px;display:block}.jarvis-command-list small{font-size:10px;color:var(--muted);display:block;margin-top:5px}@media(max-width:620px){.jarvis-command-list{grid-template-columns:1fr}}
+
+.jarvis-talk{width:100%;margin:12px 0 0}.jarvis-speech-state{font-size:10px;line-height:1.6;margin:8px 0 12px;overflow-wrap:anywhere;color:var(--brass)}
