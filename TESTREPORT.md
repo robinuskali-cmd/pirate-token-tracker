@@ -163,3 +163,7 @@ Der Nutzer bestätigt: Die Hymne ist hörbar, die Browserstimme nicht. Deshalb v
 ## Ruhigere Jarvis-Stimme
 
 Alle 288 Sprachsegmente und der direkte Tontest wurden mit Microsoft Katja in normalem Tempo neu aufgenommen. Neue Versionsparameter verhindern, dass Browser alte Sprachpakete mit neuen Bytebereichen kombinieren. Die vorhandenen Tests prüfen weiterhin die vollständige Zuordnung aller Texte, Zahlen und Titel sowie Wiedergabe, Stop und Fehlerfälle.
+
+## Leni aus der Schweiz
+
+Alle 288 Segmente und der direkte Audiotest wurden mit de-CH-LeniNeural bei -5 % Tempo neu erzeugt. Die MP3-Abschnitte werden auf hörbares Signal, vollständige Manifest-Zuordnung und lückenlose Bytebereiche geprüft. Sprache, Zahlen und Battlepass-Titel verwenden dieselbe Stimme. Versionsparameter an Modulen und Audiolinks wurden gemeinsam auf leni-1 gesetzt.

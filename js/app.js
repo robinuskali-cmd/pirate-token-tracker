@@ -1,10 +1,10 @@
 import { TrackerStore } from './store.js';
-import { LocalCoach, coachContext, coachIntent, COACH_GREETING } from './coach.js?v=soft-1';
-import { CoachSpeech } from './coach-speech.js?v=soft-1';
-import { coachWidget } from './coach-view.js?v=soft-1';
-import { createViews } from './views.js?v=soft-1';
-import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=soft-1';
-import { AnthemPlayer } from './anthem.js?v=soft-1';
+import { LocalCoach, coachContext, coachIntent, COACH_GREETING } from './coach.js?v=leni-1';
+import { CoachSpeech } from './coach-speech.js?v=leni-1';
+import { coachWidget } from './coach-view.js?v=leni-1';
+import { createViews } from './views.js?v=leni-1';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=leni-1';
+import { AnthemPlayer } from './anthem.js?v=leni-1';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';

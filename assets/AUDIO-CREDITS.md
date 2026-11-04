@@ -12,4 +12,8 @@ The request omits credentials and the referring page URL. No microphone audio is
 
 # Jarvis
 
-Die selbst geschriebenen Jarvis-Texte wurden lokal mit Windows System.Speech (deutsche Stimme Microsoft Katja, normales Sprechtempo) in WAV-Dateien gerendert und mit FFmpeg in MP3 umgewandelt. `jarvis-voice.bin` enthält 288 vollständige MP3-Abschnitte; `js/voice-recordings.js` beschreibt deren Bytebereiche. `jarvis-test.mp3` ist eine separate Testaufnahme. Zur Laufzeit wird keine Browserstimme oder externe TTS-/KI-API verwendet.
+Die selbst geschriebenen Jarvis-Texte wurden vorab mit Microsofts neuronaler Stimme Leni (`de-CH-LeniNeural`, Schweizer Hochdeutsch, Tempo -5 %, unveränderte Tonhöhe) über `edge-tts` erzeugt und mit FFmpeg in MP3 umgewandelt. `jarvis-voice.bin` enthält 288 vollständige MP3-Abschnitte; `js/voice-recordings.js` beschreibt deren Bytebereiche. `jarvis-test.mp3` ist eine separate Testaufnahme derselben Stimme.
+
+Zur Laufzeit werden die Aufnahmen vom eigenen GitHub-Pages-Hosting geladen. Es wird keine Browserstimme oder externe TTS-/KI-API aufgerufen; weder Mikrofonaufnahmen noch Gesprächsinhalte werden zur Spracherzeugung übertragen.
+
+Werkzeug: https://github.com/rany2/edge-tts

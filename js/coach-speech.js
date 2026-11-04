@@ -1,9 +1,9 @@
-import { VOICE_CUES } from './voice-recordings.js?v=soft-1';
-import { speechPlan } from './voice-plan.js?v=soft-1';
+import { VOICE_CUES } from './voice-recordings.js?v=leni-1';
+import { speechPlan } from './voice-plan.js?v=leni-1';
 export class CoachSpeech {
   constructor({getContext,fetchAudio=(...args)=>globalThis.fetch(...args),cues=VOICE_CUES,plan=speechPlan,onBefore=()=>{},onAfter=()=>{},onChange=()=>{}}) {
     Object.assign(this,{getContext,fetchAudio,cues,plan,onBefore,onAfter,onChange});
-    this.state={status:'idle',message:'Jarvis spricht mit der ruhigen Stimme Katja. Klicke „Jarvis sprechen lassen“.'};
+    this.state={status:'idle',message:'Jarvis spricht mit Leni aus der Schweiz. Klicke „Jarvis sprechen lassen“.'};
     this.generation=0;this.held=false;this.sources=[];this.cache=new Map();this.pack=null;this.loading=null;
   }
   get supported(){return typeof this.getContext==='function';}
@@ -11,7 +11,7 @@ export class CoachSpeech {
   unlock(){try{this.getContext().resume().catch(()=>{});}catch{}}
   async load(){
     if(!this.pack){
-      this.loading ||= this.fetchAudio(new URL('../assets/jarvis-voice.bin?v=soft-1',import.meta.url).href,{credentials:'omit',signal:AbortSignal.timeout(30000)}).then(async response=>{
+      this.loading ||= this.fetchAudio(new URL('../assets/jarvis-voice.bin?v=leni-1',import.meta.url).href,{credentials:'omit',signal:AbortSignal.timeout(30000)}).then(async response=>{
         if(!response.ok)throw Error('Sprachdatei konnte nicht geladen werden.');this.pack=await response.arrayBuffer();
       }).finally(()=>{this.loading=null;});
       await this.loading;

@@ -1,7 +1,7 @@
 import { icon } from './icons.js';
 import { dailyChart, rateChart } from './charts.js';
 import { battlepassPage as renderBattlepass } from './battlepass-view.js';
-import { voicePanel, voicePage as renderVoicePage } from './voice-view.js?v=soft-1';
+import { voicePanel, voicePage as renderVoicePage } from './voice-view.js?v=leni-1';
 import { number as n, escapeHtml as e, duration, secondsSince, activeSession, activeRound, roundCount, roundTotal, roundSeconds, totalChests, nextMilestone } from './core.js';
 
 // Rendering only. Auth, mutations, persistence and calculations stay in their
