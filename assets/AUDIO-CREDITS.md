@@ -17,3 +17,5 @@ Die selbst geschriebenen Jarvis-Texte wurden vorab mit Microsofts neuronaler Sti
 Zur Laufzeit werden die Aufnahmen vom eigenen GitHub-Pages-Hosting geladen. Es wird keine Browserstimme oder externe TTS-/KI-API aufgerufen; weder Mikrofonaufnahmen noch Gesprächsinhalte werden zur Spracherzeugung übertragen.
 
 Werkzeug: https://github.com/rany2/edge-tts
+
+Zusätzlich auswählbar: Florian (`de-DE-FlorianMultilingualNeural`, Deutsch, männlich, Tempo -5 %, unveränderte Tonhöhe). `jarvis-florian.bin`, `voice-recordings-florian.js` und `jarvis-florian-test.mp3` enthalten dieselben Texte in seiner Stimme. Die Auswahl wird lokal im Browser gespeichert; jedes Sprachpaket wird erst bei Bedarf geladen.

@@ -1,10 +1,11 @@
+import { COACH_VOICE_STORAGE_KEY, readCoachVoice, writeCoachVoice } from './coach-voices.js?v=voices-1';
 import { TrackerStore } from './store.js';
-import { LocalCoach, coachContext, coachIntent, COACH_GREETING } from './coach.js?v=leni-1';
-import { CoachSpeech } from './coach-speech.js?v=leni-1';
-import { coachWidget } from './coach-view.js?v=leni-1';
-import { createViews } from './views.js?v=leni-1';
-import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=leni-1';
-import { AnthemPlayer } from './anthem.js?v=leni-1';
+import { LocalCoach, coachContext, coachIntent, COACH_GREETING } from './coach.js?v=voices-1';
+import { CoachSpeech } from './coach-speech.js?v=voices-1';
+import { coachWidget } from './coach-view.js?v=voices-1';
+import { createViews } from './views.js?v=voices-1';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=voices-1';
+import { AnthemPlayer } from './anthem.js?v=voices-1';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
@@ -71,7 +72,7 @@ const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:crea
   canAct:()=>Boolean(store.state && store.actor && !dialog.open && (!document.hasFocus() || !document.activeElement?.closest('input,textarea,select,[contenteditable="true"]'))),
   onCommand:async action=>{if(voiceScope!==currentVoiceScope())throw new Error('Spielerzugang gewechselt. Sprachsteuerung erneut starten.');if(action.startsWith('add'))await add(store.actor,Number(action.slice(3)));else if(action==='undo')await undo(store.actor);},
 });
-coachSpeech=new CoachSpeech({getContext:getVoiceAudio,onBefore:()=>{anthem.stop();voice.suspendForSpeech();},onAfter:()=>voice.resumeAfterSpeech(),onChange:()=>render()});
+coachSpeech=new CoachSpeech({voice:readCoachVoice(localStorage),getContext:getVoiceAudio,onBefore:()=>{anthem.stop();voice.suspendForSpeech();},onAfter:()=>voice.resumeAfterSpeech(),onChange:()=>render()});
 const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage, voicePage } = createViews({
   store, pages, button, avatar, connection, saved, displayTotal, pendingFor, date, time, playerName,
   getPage: () => page, getChartDays: () => chartDays,
@@ -79,7 +80,8 @@ const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepas
   getShortcuts: () => shortcuts, getShortcutDraft: () => shortcutDraft, shortcutLabel,
   isShortcutDirty: () => shortcutDirty,
   getEquippedTitle,
-  getVoice:()=>({...voice.state,testMode:voiceMode==='test',commands:voiceSettings.commands,supported:Boolean(SpeechRecognition && navigator.locks?.request),dirty:voiceDirty,coachReadAloud:coachState.readAloud,coachSpeech:coachSpeech.state,coachSpeechSupported:coachSpeech.supported,music:{...anthem.state,volume:anthem.volume}}),
+  getVoice:()=>({...voice.state,testMode:voiceMode==='test',commands:voiceSettings.commands,supported:Boolean(SpeechRecognition && navigator.locks?.request),dirty:voiceDirty,coachReadAloud:coachState.readAloud,coachVoice:coachSpeech.voice,coachSpeech:coachSpeech.state,coachSpeechSupported:coachSpeech.supported,music:{...anthem.state,volume:anthem.volume}}),
+  getCoachVoice:()=>coachSpeech.voice,
   getVoiceDraft:()=>voiceDraft,
 });
 let lastRenderedPage = null;
@@ -131,7 +133,7 @@ function render() {
   if (!store.state && !['signedout','error'].includes(store.status)) { root.innerHTML=shell('<div class="empty"><span class="loader" style="display:inline-block"></span><p class="mt">Das Logbuch wird geladen …</p></div>'); return; }
   if (!store.state) root.innerHTML=shell(loginPage());
   else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage,voice:voicePage})[page]());
-  if(store.state)root.insertAdjacentHTML('beforeend',coachWidget({...coachState,speech:coachSpeech.state},coachContext(store.state,store.actor)));
+  if(store.state)root.insertAdjacentHTML('beforeend',coachWidget({...coachState,speech:coachSpeech.state,voice:coachSpeech.voice},coachContext(store.state,store.actor)));
   if(chatScroll!==undefined){const chat=root.querySelector('.jarvis-chat');if(chat)chat.scrollTop=chatScroll;}
   if (page==='rng' && store.state) renderRng();
   updateTableLabels();
@@ -164,6 +166,7 @@ function keyboardDirty() {
   const error = root.querySelector('#shortcut-error'); if (error) error.textContent = '';
 }
 window.addEventListener('storage', event => {
+  if(event.key===COACH_VOICE_STORAGE_KEY||event.key===null){coachSpeech.setVoice(readCoachVoice(localStorage));render();if(event.key!==null)return;}
   if(event.key===VOICE_STORAGE_KEY){voiceSettings=readVoiceSettings(localStorage);if(!voiceDirty)voiceDraft=structuredClone(voiceSettings);if(voice.active)voice.stop('Sprachbefehle wurden in einem anderen Tab geändert. Bitte selbst erneut starten.');else render();return;}
   if (event.key === equippedTitleKey()) { render(); return; }
   if (event.key !== SHORTCUT_STORAGE_KEY) return;
@@ -305,7 +308,7 @@ function coachReply(intent,userText='',fromVoice=false){
 root.addEventListener('keydown',event=>{if(event.key==='Escape'&&coachState.open&&event.target.closest('.jarvis-dock')){event.preventDefault();actions['coach-close']();}});
 function saveVoice(settings){voiceSettings=writeVoiceSettings(localStorage,settings);voiceDraft=structuredClone(voiceSettings);voiceDirty=false;voice.stop('Sprachbefehle gespeichert. Mikrofon bei Bedarf selbst starten.');}
 function dirtyVoice(){voiceDirty=true;const status=root.querySelector('#voice-save-status');if(status)status.textContent='Noch nicht gespeichert.';const error=root.querySelector('#voice-save-error');if(error)error.textContent='';}
-root.addEventListener('change',event=>{if(['coach-voice-enabled','jarvis-voice-enabled'].includes(event.target.id)){coachState.readAloud=event.target.checked;if(!coachState.readAloud)coachSpeech.stop();render();}if(event.target.id==='coach-tone'){coachState.tone=event.target.value==='gentle'?'gentle':'chaos';}if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}if(event.target.id==='voice-mode'){voiceMode=event.target.value==='live'?'live':'test';voice.stop('Modus geändert. Mikrofon selbst erneut starten.');}if(event.target.id==='voice-sound'){voiceDraft.sound=event.target.checked;dirtyVoice();}});
+root.addEventListener('change',event=>{if(event.target.id==='coach-speaker'){try{const selected=writeCoachVoice(localStorage,event.target.value);coachSpeech.setVoice(selected);render();toast('Jarvis-Stimme gespeichert.');}catch{render();toast('Stimme konnte nicht gespeichert werden. Bitte Browserspeicher erlauben.','error');}return;}if(['coach-voice-enabled','jarvis-voice-enabled'].includes(event.target.id)){coachState.readAloud=event.target.checked;if(!coachState.readAloud)coachSpeech.stop();render();}if(event.target.id==='coach-tone'){coachState.tone=event.target.value==='gentle'?'gentle':'chaos';}if(event.target.id==='chart-days'){chartDays=Number(event.target.value);render();}if(event.target.id==='demo-actor')store.selectActor(event.target.value);if(event.target.id==='shortcuts-enabled'){shortcutDraft.enabled=event.target.checked;keyboardDirty();}if(event.target.id==='voice-mode'){voiceMode=event.target.value==='live'?'live':'test';voice.stop('Modus geändert. Mikrofon selbst erneut starten.');}if(event.target.id==='voice-sound'){voiceDraft.sound=event.target.checked;dirtyVoice();}});
 root.addEventListener('input',event=>{
   if(event.target.id==='coach-input')coachState.draft=event.target.value.slice(0,160);
   if(event.target.id==='anthem-volume'){anthem.setVolume(Number(event.target.value)/100);const label=root.querySelector('#anthem-volume-value');if(label)label.textContent=event.target.value+' %';}

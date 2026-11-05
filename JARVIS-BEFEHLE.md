@@ -1,55 +1,42 @@
-# Jarvis – alle Sprachbefehle
+# Jarvis – Befehlstabelle
 
-Zuerst **Jarvis sprechen lassen** anklicken und die Begrüßung anhören. Danach Mikrofon unter „Sprache“ starten und den Befehl einzeln sprechen. Jarvis antwortet auch im Testmodus; seine Befehle ändern keine Truhenzähler. „Antworten vorlesen“ schaltet die vorbereiteten Audioaufnahmen ein. Während einer Antwort pausiert die Erkennung und hört danach wieder zu. „Jarvis stoppen“ bricht nur die Ausgabe ab; „Mikrofon stoppen“ beendet beides.
+Unter **Einstellungen → Jarvis-Stimme** zwischen **Leni (Schweiz, weiblich)** und **Florian (Deutschland, männlich)** wählen. Die Auswahl wird sofort im Browser gespeichert. **Stimme testen** spielt eine Begrüßung ab.
 
-## Motivation
+Für Sprachbefehle unter Sprache selbst das Mikrofon starten und jeden Befehl einzeln sagen. Jarvis antwortet auch im Testmodus und verändert keine Truhenzähler. Je Befehl gibt es drei zufällige Antworten, bei Motivation vier. **Jarvis stoppen** beendet die Ausgabe; **Mikrofon stoppen** beendet auch das Zuhören.
 
-- **Jarvis, motivier mich** – auch: Jarvis, Motivation / Jarvis, gib mir Motivation (4 Zufallsantworten)
-- **Jarvis, ich kann nicht mehr** – auch: Ich kann nicht mehr (3 Zufallsantworten)
-- **Jarvis, ich raste aus** (3 Zufallsantworten)
-- **Jarvis, Pause** (3 Zufallsantworten)
-- **Jarvis, ich kündige** (3 Zufallsantworten)
-- **Jarvis, Endspurt** (3 Zufallsantworten)
-
-## Loot & Pech
-
-- **Jarvis, wo ist mein Token** – auch: Wo ist mein Token (3 Zufallsantworten)
-- **Jarvis, Jackpot** – auch: Jackpot (3 Zufallsantworten)
-- **Jarvis, noch eine Truhe** (3 Zufallsantworten)
-- **Jarvis, ich bin verflucht** (3 Zufallsantworten)
-- **Jarvis, Glück aktivieren** (3 Zufallsantworten)
-- **Jarvis, warum bekomme ich nichts** (3 Zufallsantworten)
-
-## Roasts
-
-- **Jarvis, bin ich gut** (3 Zufallsantworten)
-- **Jarvis, roast mich** – auch: Jarvis, beleidige mich (3 Zufallsantworten)
-- **Jarvis, härter** (3 Zufallsantworten)
-- **Jarvis, wie spiele ich** (3 Zufallsantworten)
-- **Jarvis, ich bin eine Legende** (3 Zufallsantworten)
-- **Jarvis, ich habe einen Plan** (3 Zufallsantworten)
-- **Jarvis, wer ist hier der Boss** (3 Zufallsantworten)
-
-## Status
-
-- **Jarvis, Status** – auch: Kapitän, Status / Jarvis, Kapitän Status (3 Zufallsantworten)
-
-## Crew
-
-- **Jarvis, Szymon ist besser** (3 Zufallsantworten)
-- **Jarvis, Max ist besser** (3 Zufallsantworten)
-- **Jarvis, mach eine Ansage** (3 Zufallsantworten)
-- **Jarvis, danke** (3 Zufallsantworten)
-
-## Konter
-
-- **Jarvis, du Bastard** (3 Zufallsantworten)
-- **Jarvis, du Wichser** (3 Zufallsantworten)
-- **Jarvis, halt die Fresse** (3 Zufallsantworten)
-- **Jarvis, du bist nutzlos** (3 Zufallsantworten)
-- **Jarvis, fick dich** (3 Zufallsantworten)
-- **Jarvis, bist du dumm** (3 Zufallsantworten)
-- **Jarvis, ich hasse dich** (3 Zufallsantworten)
+| Befehl | Thema | Weitere Formulierungen |
+|---|---|---|
+| Jarvis, motivier mich | Motivation | Jarvis, Motivation / Jarvis, gib mir Motivation |
+| Jarvis, ich kann nicht mehr | Motivation | Ich kann nicht mehr |
+| Jarvis, ich raste aus | Motivation | — |
+| Jarvis, wo ist mein Token | Loot & Pech | Wo ist mein Token |
+| Jarvis, bin ich gut | Roasts | — |
+| Jarvis, Status | Status | Kapitän, Status / Jarvis, Kapitän Status |
+| Jarvis, Pause | Motivation | — |
+| Jarvis, Jackpot | Loot & Pech | Jackpot |
+| Jarvis, noch eine Truhe | Loot & Pech | — |
+| Jarvis, Szymon ist besser | Crew | — |
+| Jarvis, Max ist besser | Crew | — |
+| Jarvis, ich bin verflucht | Loot & Pech | — |
+| Jarvis, mach eine Ansage | Crew | — |
+| Jarvis, Glück aktivieren | Loot & Pech | — |
+| Jarvis, ich kündige | Motivation | — |
+| Jarvis, Endspurt | Motivation | — |
+| Jarvis, danke | Crew | — |
+| Jarvis, roast mich | Roasts | Jarvis, beleidige mich |
+| Jarvis, härter | Roasts | — |
+| Jarvis, wie spiele ich | Roasts | — |
+| Jarvis, ich bin eine Legende | Roasts | — |
+| Jarvis, warum bekomme ich nichts | Loot & Pech | — |
+| Jarvis, ich habe einen Plan | Roasts | — |
+| Jarvis, wer ist hier der Boss | Roasts | — |
+| Jarvis, du Bastard | Konter | — |
+| Jarvis, du Wichser | Konter | — |
+| Jarvis, halt die Fresse | Konter | — |
+| Jarvis, du bist nutzlos | Konter | — |
+| Jarvis, fick dich | Konter | — |
+| Jarvis, bist du dumm | Konter | — |
+| Jarvis, ich hasse dich | Konter | — |
 
 ## Zählen und Musik
 

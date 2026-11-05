@@ -1,4 +1,4 @@
-Aktueller Stand: **92 Tests bestanden**. Jarvis verwendet vorbereitete Audioaufnahmen; frühere SpeechSynthesis-Prüfungen unten dokumentieren die vorherige Implementierung.
+Aktueller Stand: **96 Tests bestanden**. Jarvis verwendet vorbereitete Audioaufnahmen; frühere SpeechSynthesis-Prüfungen unten dokumentieren die vorherige Implementierung.
 
 # Prüfbericht · Interface 1.1
 
@@ -167,3 +167,9 @@ Alle 288 Sprachsegmente und der direkte Tontest wurden mit Microsoft Katja in no
 ## Leni aus der Schweiz
 
 Alle 288 Segmente und der direkte Audiotest wurden mit de-CH-LeniNeural bei -5 % Tempo neu erzeugt. Die MP3-Abschnitte werden auf hörbares Signal, vollständige Manifest-Zuordnung und lückenlose Bytebereiche geprüft. Sprache, Zahlen und Battlepass-Titel verwenden dieselbe Stimme. Versionsparameter an Modulen und Audiolinks wurden gemeinsam auf leni-1 gesetzt.
+## Jarvis-Stimmenauswahl und Befehlstabelle
+
+Leni und Florian sind unter Einstellungen auswählbar. Die Auswahl wird validiert, lokal gespeichert und zwischen Tabs übernommen. Ein Wechsel beendet die alte Wiedergabe. Audio-Pakete, ausstehende Downloads und decodierte Abschnitte bleiben pro Stimme getrennt; verspätete Antworten können die neue Auswahl nicht überschreiben.
+
+Zusätzliche Tests prüfen beide vollständigen Sprachpakete, alle Texte und Zahlen, Wechsel während Wiedergabe und Download sowie die gespeicherte Auswahl. Die Sprachseite und die herunterladbare Befehlsliste zeigen dieselben 31 Befehle einschließlich Alternativen als Tabelle.
+

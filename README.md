@@ -284,3 +284,9 @@ Unter Sprache auf **Jarvis sprechen lassen** klicken, dann Mikrofon selbst start
 288 Sprachsegmente liegen als vollständige MP3-Dateien in `assets/jarvis-voice.bin` (2,83 MB). Die Datei wird beim ersten Sprechen geladen. Der Player dekodiert nur benötigte Abschnitte und hält höchstens 40 dekodierte Segmente im Cache. `js/voice-recordings.js` enthält die Bytebereiche; `js/voice-plan.js` setzt feste Spruchteile mit Namen, Zahlen und Battlepass-Titeln zusammen. Aktuelle persönliche Statuswerte bleiben erhalten. Es werden keine Coach-Texte an einen Sprach- oder KI-Dienst übertragen. Die Mikrofon-Spracherkennung des Browsers kann weiterhin dessen Dienst verwenden.
 
 Beim Vorlesen pausiert die Erkennung gegen eigene Sprachbefehle und wird nur fortgesetzt, wenn sie vorher aktiv war. Stopp, Accountwechsel, Dialoge und Verlassen der Seite brechen laufende oder noch ladende Aufnahmen ab. Netzwerk-/Decoderfehler bleiben sichtbar. Die Aufnahme-Dateien wurden lokal mit einer deutschen synthetischen Stimme erzeugt; `assets/AUDIO-CREDITS.md` nennt die Herkunft.
+# Jarvis-Stimme wählen
+
+Unter **Einstellungen → Jarvis-Stimme** stehen Leni (Schweiz, weiblich) und Florian (Deutschland, männlich) zur Wahl. Die Auswahl wird sofort für diesen Browser gespeichert und zwischen seinen Tabs geteilt. **Stimme testen** spielt eine Begrüßung mit der ausgewählten Stimme ab. Sprachpakete werden erst bei der Wiedergabe geladen; ein Wechsel beendet die laufende Antwort.
+
+Die vollständige Befehlstabelle steht unter **Sprache → Alle Jarvis-Befehle anzeigen** und in [JARVIS-BEFEHLE.md](./JARVIS-BEFEHLE.md).
+

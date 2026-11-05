@@ -1,5 +1,5 @@
-import { JARVIS_COMMANDS } from './jarvis-commands.js?v=leni-1';
-import { COACH_PACKS, COACH_GREETING, COACH_HELLO, COACH_UNKNOWN } from './coach.js?v=leni-1';
+import { JARVIS_COMMANDS } from './jarvis-commands.js?v=voices-1';
+import { COACH_PACKS, COACH_GREETING, COACH_HELLO, COACH_UNKNOWN } from './coach.js?v=voices-1';
 import { REWARDS } from './battlepass.js';
 export const cleanAudioText=text=>{const value=String(text).replace(/\s+/g,' ').trim();return /[\p{L}\p{N}]/u.test(value)?value:'';};
 export const VOICE_TEMPLATES=[...new Set([...JARVIS_COMMANDS.flatMap(c=>c.replies),...Object.values(COACH_PACKS).flat(),COACH_GREETING,COACH_HELLO,COACH_UNKNOWN])];

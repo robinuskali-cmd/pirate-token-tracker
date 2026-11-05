@@ -2,3 +2,5 @@
 
 .anthem-panel{margin:1.25rem 0;padding:1.15rem;border:1px solid var(--line,#30404c);border-radius:12px;background:rgba(255,255,255,.025)}
 .anthem-panel h3{margin:0 0 .65rem}.anthem-panel>p{line-height:1.6}.anthem-panel a{color:var(--accent,#e6b56a)}.anthem-volume{display:flex;justify-content:space-between;max-width:320px;margin-top:1rem}.anthem-panel input[type=range]{width:100%;max-width:320px;accent-color:#e6b56a}
+
+.jarvis-settings .field{margin:18px 0 0}.jarvis-settings select{width:100%;max-width:100%;min-width:0}.jarvis-settings .voice-controls{margin-top:16px}.jarvis-settings .voice-controls a{font-size:12px}.jarvis-command-table{margin-top:18px}.jarvis-command-table td{white-space:normal;overflow-wrap:anywhere}.jarvis-command-table small{font-size:10px;color:var(--muted)}
