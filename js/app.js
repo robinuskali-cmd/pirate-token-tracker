@@ -1,11 +1,11 @@
-import { COACH_VOICE_STORAGE_KEY, readCoachVoice, writeCoachVoice } from './coach-voices.js?v=voices-1';
+import { COACH_VOICE_STORAGE_KEY, readCoachVoice, writeCoachVoice } from './coach-voices.js?v=commands-1';
 import { TrackerStore } from './store.js';
-import { LocalCoach, coachContext, coachIntent, COACH_GREETING } from './coach.js?v=voices-1';
-import { CoachSpeech } from './coach-speech.js?v=voices-1';
-import { coachWidget } from './coach-view.js?v=voices-1';
-import { createViews } from './views.js?v=voices-1';
-import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=voices-1';
-import { AnthemPlayer } from './anthem.js?v=voices-1';
+import { LocalCoach, coachContext, coachIntent, COACH_GREETING } from './coach.js?v=commands-1';
+import { CoachSpeech } from './coach-speech.js?v=commands-1';
+import { coachWidget } from './coach-view.js?v=commands-1';
+import { createViews } from './views.js?v=commands-1';
+import { VoiceController, createVoiceLease, defaultVoiceSettings, readVoiceSettings, writeVoiceSettings, VOICE_STORAGE_KEY } from './voice.js?v=commands-1';
+import { AnthemPlayer } from './anthem.js?v=commands-1';
 import { icon } from './icons.js';
 import { authCallbackTarget } from './account-service.js';
 import { equippedReward, equipReward, titleStorageKey } from './battlepass.js';
@@ -17,7 +17,7 @@ const authRedirect = authCallbackTarget(location.href);
 if (authRedirect) location.replace(authRedirect);
 const store = new TrackerStore();
 let shortcuts = readShortcuts(localStorage), shortcutDraft = structuredClone(shortcuts), shortcutDirty = false;
-const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'], battlepass: ['Battlepass','trophy'], voice: ['Sprache','mic',true] };
+const pages = { overview: ['Live','grid'], rounds: ['Logbuch','book'], stats: ['Statistik','chart'], rng: ['RNG-Labor','compass'], settings: ['Einstellungen','settings'], battlepass: ['Battlepass','trophy'], voice: ['Sprache','mic',true], jarvis: ['Jarvis-Befehle','book',true] };
 let page = Object.hasOwn(pages, location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 let chartDays = 7, rngPercent = .1, rngChests = 1600, previousTotal = null, toastTimer;
 const playerName = id => id === 'max' ? 'Max' : 'Szymon';
@@ -73,7 +73,7 @@ const voice=new VoiceController({Recognition:SpeechRecognition,acquireLease:crea
   onCommand:async action=>{if(voiceScope!==currentVoiceScope())throw new Error('Spielerzugang gewechselt. Sprachsteuerung erneut starten.');if(action.startsWith('add'))await add(store.actor,Number(action.slice(3)));else if(action==='undo')await undo(store.actor);},
 });
 coachSpeech=new CoachSpeech({voice:readCoachVoice(localStorage),getContext:getVoiceAudio,onBefore:()=>{anthem.stop();voice.suspendForSpeech();},onAfter:()=>voice.resumeAfterSpeech(),onChange:()=>render()});
-const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage, voicePage } = createViews({
+const { shell, overview, roundsPage, statsPage, rngPage, settingsPage, battlepassPage, voicePage, jarvisCommandsPage } = createViews({
   store, pages, button, avatar, connection, saved, displayTotal, pendingFor, date, time, playerName,
   getPage: () => page, getChartDays: () => chartDays,
   getRng: () => ({ percent: rngPercent, chests: rngChests }),
@@ -132,7 +132,7 @@ function render() {
   const focusAttributes = focused?.tagName === 'BUTTON' ? ['action','player','delta','page','round','request','level','intent'].filter(key=>focused.dataset[key]).map(key=>`[data-${key}="${CSS.escape(focused.dataset[key])}"]`).join('') : '';
   if (!store.state && !['signedout','error'].includes(store.status)) { root.innerHTML=shell('<div class="empty"><span class="loader" style="display:inline-block"></span><p class="mt">Das Logbuch wird geladen …</p></div>'); return; }
   if (!store.state) root.innerHTML=shell(loginPage());
-  else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage,voice:voicePage})[page]());
+  else root.innerHTML=shell(({overview,rounds:roundsPage,stats:statsPage,rng:rngPage,settings:settingsPage,battlepass:battlepassPage,voice:voicePage,jarvis:jarvisCommandsPage})[page]());
   if(store.state)root.insertAdjacentHTML('beforeend',coachWidget({...coachState,speech:coachSpeech.state,voice:coachSpeech.voice},coachContext(store.state,store.actor)));
   if(chatScroll!==undefined){const chat=root.querySelector('.jarvis-chat');if(chat)chat.scrollTop=chatScroll;}
   if (page==='rng' && store.state) renderRng();
@@ -150,7 +150,7 @@ function render() {
     previousTotal=total;
   }
 }
-function navigate(next) { if (!Object.hasOwn(pages,next)) return; page=next; location.hash=next; render(); window.scrollTo({top:0,behavior:'instant'}); }
+function navigate(next) { if (!Object.hasOwn(pages,next)) return; if(next==='jarvis')coachState.open=false; page=next; location.hash=next; render(); window.scrollTo({top:0,behavior:'instant'}); }
 function saveKeyboard(settings) {
   try { shortcuts = writeShortcuts(localStorage, settings); }
   catch (error) {

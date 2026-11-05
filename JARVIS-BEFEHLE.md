@@ -1,5 +1,7 @@
 # Jarvis – Befehlstabelle
 
+Direkt auf der Website: **Einstellungen → Jarvis-Befehle** oder im Jarvis-Fenster **Alle Jarvis-Befehle**. Die Tabelle unter `#jarvis` ist vollständig aufgeklappt.
+
 Unter **Einstellungen → Jarvis-Stimme** zwischen **Leni (Schweiz, weiblich)** und **Florian (Deutschland, männlich)** wählen. Die Auswahl wird sofort im Browser gespeichert. **Stimme testen** spielt eine Begrüßung ab.
 
 Für Sprachbefehle unter Sprache selbst das Mikrofon starten und jeden Befehl einzeln sagen. Jarvis antwortet auch im Testmodus und verändert keine Truhenzähler. Je Befehl gibt es drei zufällige Antworten, bei Motivation vier. **Jarvis stoppen** beendet die Ausgabe; **Mikrofon stoppen** beendet auch das Zuhören.

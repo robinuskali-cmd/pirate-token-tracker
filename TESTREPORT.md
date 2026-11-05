@@ -173,3 +173,7 @@ Leni und Florian sind unter Einstellungen auswählbar. Die Auswahl wird validier
 
 Zusätzliche Tests prüfen beide vollständigen Sprachpakete, alle Texte und Zahlen, Wechsel während Wiedergabe und Download sowie die gespeicherte Auswahl. Die Sprachseite und die herunterladbare Befehlsliste zeigen dieselben 31 Befehle einschließlich Alternativen als Tabelle.
 
+## Direkt erreichbare Jarvis-Befehle
+
+Die Seite `#jarvis` zeigt alle 31 Katalogbefehle ohne Aufklappen. Browserprüfung: 32 Tabellenzeilen einschließlich Kopfzeile, Alternativformulierungen, aktuelle Zählbelegung und Musikbefehle sichtbar. Navigation aus Einstellungen und aus dem Jarvis-Fenster geprüft; beim Öffnen über das Fenster schließt dieses automatisch. Die vorhandenen sieben Coach-Tests bestehen weiterhin.
+
